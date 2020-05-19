@@ -2,24 +2,74 @@
 Classifier of Local Field Potential signals using Deep Neural Networks for head angular direction prediction 
 
 ## Prerequisites
+The current project was developed using **Ubuntu 18.04.4 LTS**.
+The following are the required packages and python libraries.
+It is recommended to use the listed versions, nevertheless is worth to try the newest available version of them.
 
-Install:
-
+### Packages:
 ```
-1. pip3 
-2. python v3.6
-3. numpy
-4. matplotlib
-5. tensorflow
-6. keras
-7. sklearn
+1. Python (3.6) 
 ```
 
+**Optional:**
+```
+1. Latex
+2. Doxygen
+3. Make
+4. Git
+```
+
+### Python libraries:
+Package | Version
+------- | --------
+pip3 | 20.1
+numpy | 1.18.4
+matplotlib | 3.2.1 
+tensorflow | 2.2.0
+keras | 2.3.1
+sklearn | 0.0
+pandas | 1.0.3
+scikit-learn | 0.23.0
+seaborn | 0.10.1
+
+
+## Install
+
+Check the installed Linux version using: `lsb_release -a`.
+Check the installed version of the package using: `<package> --<version>`
+Check the installed python libraries and their version using: `pip list`
+
+### Packages:
+```
+sudo apt-get install python3.6 texlive-latex-extra doxygen doxygen-gui make git
+```
+
+### Pip:
+
+This is necessary to install the rest of python libraries
+
+```
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python3.6 get-pip.py
+```
+
+### Python libraries:
+
+If getting the latest available version:
+```
+pip3 install --upgrade <package>
+```
+
+To download an specific version:
+```
+pip3 install <package>==<version>
+```
+ 
 ## Usage
 
 
 ## Author
-**Pablo Avila** - [PabloAvLo](https://github.com/PurpleBooth)
+**Pablo Avila** - [PabloAvLo](https://github.com/PabloAvLo)
 
 ## License
 This project is licensed under the MIT License - see the LICENSE.md file for details

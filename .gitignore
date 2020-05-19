@@ -1,0 +1,23 @@
+########################################################################
+#                         University of Costa Rica
+#                     Electrical Engineering Department
+#                               Grade Thesis
+#
+# \file: .gitignore
+# \author: Pablo Avila [B30724]
+# \email: jose.avilalopez@ucr.ac.cr
+# \copyright: MIT License
+# \date: May, 2020
+# \details This file list the patterns to be ignore from the git
+# repository tracking.
+# For more examples: https://github.com/github/gitignore
+########################################################################
+
+# Virtual Environments
+venv/
+
+# IDE's configuration folders
+.idea/
+
+
+
