@@ -17,6 +17,7 @@ It is recommended to use the listed versions, nevertheless is worth to try the n
 2. Doxygen
 3. Make
 4. Git
+5. Graphviz
 ```
 
 ### Python libraries:
@@ -41,7 +42,7 @@ Check the installed python libraries and their version using: `pip list`
 
 ### Packages:
 ```
-sudo apt-get install python3.6 texlive-latex-extra doxygen doxygen-gui make git
+sudo apt-get install python3.6 texlive-latex-extra doxygen doxygen-gui make git graphviz
 ```
 
 ### Pip:

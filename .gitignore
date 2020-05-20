@@ -19,5 +19,12 @@ venv/
 # IDE's configuration folders
 .idea/
 
+# Results folders
+Results*/
 
+# Byte-compiled / optimized / DLL files
+__pycache__/
 
+# Doxygen generated folders
+latex/
+html/

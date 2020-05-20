@@ -11,3 +11,7 @@
 # \details This module contains a set of functions to import
 # clean, parse and reshape input data.
 ########################################################################
+
+import pandas as pd
+import pickle
+import numpy as np
