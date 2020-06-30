@@ -1,21 +1,25 @@
-########################################################################
-# <br>                         University of Costa Rica
-# <br>                     Electrical Engineering Department
-# <br>                               Grade Thesis
-#
-# \file: Softmax.py
-#
-# \author: Pablo Avila [B30724]
-# \email: jose.avilalopez@ucr.ac.cr
-#
-# \copyright: MIT License
-# \date: May, 2020
-#
-# \details Feed-forward Neural Network using Softmax algorithm in the
-# output layer.
-########################################################################
+# #######################################################################
+#                   University of Costa Rica
+#               Electrical Engineering Department
+#                         Grade Thesis
+# #######################################################################
+
+"""
+@file Softmax.py
+@author Pablo Avila [B30724] jose.avilalopez@ucr.ac.cr
+@copyright MIT License
+@date May, 2020
+@details Feed-forward Neural Network using Softmax algorithm in the output layer.
+"""
+
 import Yomchi.Environment as Env
+import Yomchi.preprocessing as data
+import Yomchi.visualization as ui
+
+import matplotlib.pyplot as plt
 import numpy as np
+
+
 """
 <h1> Feed-Forward Neural Network </h1>
 <ol>
@@ -27,31 +31,26 @@ import numpy as np
 """
 
 Env.initEnvironment(True)
-Env.step("First step")
-
-Env.printBox("Header "
-             "\nThis module contains a set of functions to successfully \ndocument every test "
-             "run by creating Results folders with console logs, generated images, dependencies "
-             "versions, etc.")
-Env.printText("Printing \nsomething")
 
 """
-<li> Step 3
+<li> Step 2
 <ul>
-<li> Import data ...
+<li> Import LFP and angles data
+<li> Plot a channels 0 and 97.
 </ul>
-"""
-Env.step("Third step", 3)
-print(10)
-
-"""
-<li> Step 4
-<ul>
-<li> Import data ...
-</ul>
-"""
-Env.step("Fourth step")
-
-"""
 </ol>
 """
+
+Env.step("Importing LFP and angles data")
+W = data.loadLFPData()
+
+Env.printText("Plotting LFP data from channels 0 and 97")
+plt.figure("LFP_Channels_0_and_97", figsize=ui.FIG_SIZE, dpi=ui.DPI)
+plt.subplot(211)
+plt.plot(W[:, 0], "r")
+plt.title("Señal LFP del Canal 0")
+
+plt.subplot(212)
+plt.plot(W[:, 97], "b")
+plt.title("Señal LFP del Canal 97")
+ui.storeFigure("LFP_Channels_0_and_97", "LFP_C0-C97.png", True)

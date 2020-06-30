@@ -15,9 +15,10 @@ It is recommended to use the listed versions, nevertheless is worth to try the n
 ```
 1. Latex
 2. Doxygen
-3. Make
-4. Git
-5. Graphviz
+3. Doxypy
+4. Make
+5. Git
+6. Graphviz
 ```
 
 ### Python libraries:

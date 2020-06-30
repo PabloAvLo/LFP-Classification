@@ -1,22 +1,18 @@
-########################################################################
-# <br>                         University of Costa Rica
-# <br>                     Electrical Engineering Department
-# <br>                               Grade Thesis
-#
-# \file: Environment.py
-#
-# \author: Pablo Avila [B30724]
-# \email: jose.avilalopez@ucr.ac.cr
-#
-# \copyright: MIT License
-# \date: May, 2020
-#
-# \details Python environment which integrates data pre-processing,
-# ML models implementation, data visualization and metrics. This module
-# contains a set of functions to successfully document every test run
-# by creating Results folders with console logs, generated images,
-# dependencies versions, etc.
-########################################################################
+# #######################################################################
+#                   University of Costa Rica
+#               Electrical Engineering Department
+#                         Grade Thesis
+# #######################################################################
+
+"""
+@file Environment.py
+@author Pablo Avila [B30724] jose.avilalopez@ucr.ac.cr
+@copyright MIT License
+@date May, 2020
+@details Python environment which integrates data pre-processing, ML models implementation, data visualization and
+metrics. This module contains a set of functions to successfully document every test run by creating Results folders
+with console logs, generated images, dependencies versions, etc.
+"""
 
 import os
 import sys
@@ -43,7 +39,7 @@ caller_file = None
 def initEnvironment(print_header=False):
     """
     Initialize the directories and files to log the results.
-    :param: print_header: If True, print the header
+    @param print_header: If True, print the header
     """
     global versions_log
     global yomchi_log
@@ -73,8 +69,8 @@ def initEnvironment(print_header=False):
 def printText(text):
     """
     Print a passed text and save it in the yomchi_log.txt.
-    :param text: Text to print
-    :return: None
+    @param text: Text to print
+    @return None
     """
     global yomchi_log
 
@@ -85,8 +81,8 @@ def printText(text):
 def printBox(text):
     """
     Print a passed text in a box and save it in the yomchi_log.txt.
-    :param text: Text to print
-    :return: None
+    @param text: Text to print
+    @return None
     """
     line_length = 64
     text_length = len(text)
@@ -114,9 +110,9 @@ def printBox(text):
 def step(description, newstep_number=0):
     """
     Print the current step number with a brief description.
-    :param description: Description of the step.
-    :param newstep_number: If defined, reset the steps numeration to the passed value.
-    :return: None
+    @param description: Description of the step.
+    @param newstep_number: If defined, reset the steps numeration to the passed value.
+    @return None
     """
     global step_number
 
@@ -130,7 +126,7 @@ def step(description, newstep_number=0):
 def logVersions():
     """
     Stores the environment versions including packages, libraries and OS.
-    :return: None
+    @return None
     """
     global versions_log
     required_packages = ["Keras", "numpy", "pandas", "matplotlib", "scikit-learn", "seaborn",
