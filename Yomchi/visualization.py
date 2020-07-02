@@ -23,9 +23,9 @@ FIG_SIZE = [12, 9]
 FIG_FORMAT = "png"
 
 
-def storeFigure(figName, fileName, show=False):
-    plt.figure(figName)
-    plt.savefig(fname=Env.CAPTURES_FOLDER+fileName, dpi=DPI, format=FIG_FORMAT)
+def store_figure(fig_name, file_name, show=False):
+    plt.figure(fig_name)
+    plt.savefig(fname=Env.CAPTURES_FOLDER+file_name, dpi=DPI, format=FIG_FORMAT)
     if show:
         plt.show()
-    plt.close(figName)
+    plt.close(fig_name)

@@ -1,0 +1,38 @@
+###############################################################
+#                                                             #
+#                  University of Costa Rica                   #
+#              Electrical Engineering Department              #
+#                        Grade Thesis                         #
+#                    Pablo Avila [B30724]                     #
+#                  jose.avilalopez@ucr.ac.cr                  #
+#                                                             #
+###############################################################
+                   *** START OF TEST ***  
+# File: DataExploration.py
+# Date: 07-02-2020
+# Time: 15:43:04
+
+|------------------------------------------------------------------|
+|                             Step 1                               |
+| Importing LFP data.                                              |
+|------------------------------------------------------------------|
+Loading LFP Data of 99 channels from: ec014.771.eeg.
+Plotting LFP data from channels 0 and 97.
+|------------------------------------------------------------------|
+|                             Step 2                               |
+| Downsample LFP data to match Angles sampling rate.               |
+|------------------------------------------------------------------|
+Downsampling LFP data by dropping 'extra' samples to match the new sampling rate: 39.06Hz. Original was: 1250Hz.
+Plotting LFP downsampled data to 39.06Hz from channels 0 and 97.
+|------------------------------------------------------------------|
+|                             Step 3                               |
+| Importing angles data                                            |
+|------------------------------------------------------------------|
+Loading the animal position data from: ec014.771.whl.
+Plotting Angles data [°]
+|------------------------------------------------------------------|
+|                             Step 4                               |
+| Pad angles data to reach a higher sampling rate                  |
+|------------------------------------------------------------------|
+Padding angles data with 'NaN' values to match the new sampling rate: 1250Hz. Original was: 39.06Hz.
+Plotting Angles data padded with 'NaN' [°]

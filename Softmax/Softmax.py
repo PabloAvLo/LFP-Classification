@@ -19,38 +19,47 @@ import Yomchi.visualization as ui
 import matplotlib.pyplot as plt
 import numpy as np
 
+## <h1> Feed-Forward Neural Network </h1>
+# <h2> Experiment Setup </h2>
+# <ul>
+# <li> Initialize Environment
+# <li> Define parameters...
+# </ul>
+# <ol>
+Env.init_environment(True)
 
-"""
-<h1> Feed-Forward Neural Network </h1>
-<ol>
-<li> Step 1
-<ul>
-<li> Initialize Environment
-<li> Define parameters... 
-</ul>
-"""
 
-Env.initEnvironment(True)
+## <li> Step 1
+# <ul>
+# <li> Import LFP data.
+# <li> Downsample LFP data to match Angles sampling rate.
+# </ul>
+Env.step("Importing and prepare LFP data.")
 
-"""
-<li> Step 2
-<ul>
-<li> Import LFP and angles data
-<li> Plot a channels 0 and 97.
-</ul>
-</ol>
-"""
+W = data.load_lfp_data(data.LFP_765)
+W_downsampled = data.downsample_lfps(W, data.lfp_SamplingRate, data.angles_SamplingRate)
 
-Env.step("Importing LFP and angles data")
-W = data.loadLFPData()
+## <li> Step 2
+# <ul>
+# <li> Import angles data.
+# <li> Fill angles gaps to match the LFP sampling rate.
+# <li> Interpolate original and padded angles data using a 'quadratic' approach.
+# </ul>
+Env.step("Import and prepare Angles data")
 
-Env.printText("Plotting LFP data from channels 0 and 97")
-plt.figure("LFP_Channels_0_and_97", figsize=ui.FIG_SIZE, dpi=ui.DPI)
-plt.subplot(211)
-plt.plot(W[:, 0], "r")
-plt.title("Señal LFP del Canal 0")
+Y = data.load_angles_data(data.ANGLES_765)
+Y_filled = data.pad_angles(Y, data.angles_SamplingRate, data.lfp_SamplingRate)
+Y_interpolated = data.interpolate_angles(Y)
+Y_filled_interpolated = data.interpolate_angles(Y_filled)
 
-plt.subplot(212)
-plt.plot(W[:, 97], "b")
-plt.title("Señal LFP del Canal 97")
-ui.storeFigure("LFP_Channels_0_and_97", "LFP_C0-C97.png", True)
+## <li> Step 6
+# <ul>
+# <li> Label data by concatenating LFPs and padded Angles in a single 2D-array
+# <li> Label data by concatenating downsampled LFPs and Angles in a single 2D-array
+# </ul>
+# </ol>
+Env.step("Label data by concatenating LFPs and  Angles in a single 2D-array.")
+
+labeled_data_filled = data.add_labels(W, np.expand_dims(Y_filled, axis=1))
+labeled_data_downsampled = data.add_labels(W_downsampled, np.expand_dims(Y, axis=1))
+

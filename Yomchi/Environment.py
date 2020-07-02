@@ -36,10 +36,10 @@ yomchi_log = None
 caller_file = None
 
 
-def initEnvironment(print_header=False):
+def init_environment(print_the_header=False):
     """
     Initialize the directories and files to log the results.
-    @param print_header: If True, print the header
+    @param print_the_header: If True, print the header
     """
     global versions_log
     global yomchi_log
@@ -60,13 +60,13 @@ def initEnvironment(print_header=False):
 
     versions_log = open(VERSIONS_LOG_PATH, "w+")
 
-    if print_header:
-        printHeader()
+    if print_the_header:
+        print_header()
 
-    logVersions()
+    log_versions()
 
 
-def printText(text):
+def print_text(text):
     """
     Print a passed text and save it in the yomchi_log.txt.
     @param text: Text to print
@@ -78,7 +78,7 @@ def printText(text):
     yomchi_log.write(text + "\n")
 
 
-def printBox(text):
+def print_box(text):
     """
     Print a passed text in a box and save it in the yomchi_log.txt.
     @param text: Text to print
@@ -101,29 +101,29 @@ def printBox(text):
             counter = 0
 
     text_array = text.splitlines()
-    printText("|" + "-" * (line_length + 2) + "|")
+    print_text("|" + "-" * (line_length + 2) + "|")
     for line in text_array:
-        printText("| " + line.ljust(line_length, ' ') + " |")
-    printText("|" + "-" * (line_length + 2) + "|")
+        print_text("| " + line.ljust(line_length, ' ') + " |")
+    print_text("|" + "-" * (line_length + 2) + "|")
 
 
-def step(description, newstep_number=0):
+def step(description, new_step_number=0):
     """
     Print the current step number with a brief description.
     @param description: Description of the step.
-    @param newstep_number: If defined, reset the steps numeration to the passed value.
+    @param new_step_number: If defined, reset the steps numeration to the passed value.
     @return None
     """
     global step_number
 
-    if newstep_number != 0:
-        step_number = newstep_number
+    if new_step_number != 0:
+        step_number = new_step_number
 
-    printBox(" " * 28 + "Step " + str(step_number) + "\n" + description)
+    print_box(" " * 28 + "Step " + str(step_number) + "\n" + description)
     step_number += 1
 
 
-def logVersions():
+def log_versions():
     """
     Stores the environment versions including packages, libraries and OS.
     @return None
@@ -168,7 +168,7 @@ def logVersions():
         versions_log.write("\n    " + package)
 
 
-def printHeader():
+def print_header():
     line_length = 63
     header = "#" * line_length \
              + "\n#" + " " * 14 + "                                 " + " " * 14 + "#" \
@@ -183,5 +183,5 @@ def printHeader():
              + "\n# File: " + caller_file \
              + "\n# Date: " + START_TIME.strftime("%m-%d-%Y") \
              + "\n# Time: " + START_TIME.strftime("%H:%M:%S") + "\n"
-    printText(header)
+    print_text(header)
     versions_log.write(header)
