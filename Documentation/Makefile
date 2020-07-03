@@ -19,7 +19,7 @@
 Target = refman.pdf
 LatexFolder = latex
 
-all: documentation pdf back
+all: documentation pdf back view
 
 documentation: 
 	doxygen Doxyfile

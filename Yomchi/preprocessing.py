@@ -155,6 +155,20 @@ def add_labels(lfps, angles):
 
     return labeled_data
 
+
+def clean_unsync_boundaries():
+    """
+    Clean the data rows wich have 'NaN' values as labels (anglres) from the beginning and end of the data.
+    @details At the beginning and at the end of the recording sessions, the LEDs of position are unsynchronized,
+    hence '-1' values are used instead to denote invalid position data. These values were replaced by 'NaN' and are
+    meant to be removed from the data since they are not representative labels.
+    @param labeled_dataset: Matrix [n x (numChannels +1)] with the LFP signals used as the preliminary features of the
+    data and the angles data extracted from the positions used as the labels of the data.
+    @return clean_dataset: Input data without 'NaN' values in the beginning nor the end.
+    """
+
+
+
 def series_to_windows(series, window_size, batch_size, shuffle_buffer, expand_series=False):
     """ TODO: Taken from the 'Sequences, Time Series and Prediction' course scripts. To be modified.
     Receives a numpy array containing the time series of LFP signals of n channels and returns the same data, separated

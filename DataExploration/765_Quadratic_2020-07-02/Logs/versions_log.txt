@@ -1,16 +1,16 @@
-###############################################################
-#                                                             #
-#                  University of Costa Rica                   #
-#              Electrical Engineering Department              #
-#                        Grade Thesis                         #
-#                    Pablo Avila [B30724]                     #
-#                  jose.avilalopez@ucr.ac.cr                  #
-#                                                             #
-###############################################################
-                   *** START OF TEST ***  
-# File: DataExploration.py
-# Date: 07-02-2020
-# Time: 15:41:36
+#######################################################################################################
+#                                                                                                     #
+#                                      University of Costa Rica                                       #
+#                                  Electrical Engineering Department                                  #
+#                                            Grade Thesis                                             #
+#                                        Pablo Avila [B30724]                                         #
+#                                      jose.avilalopez@ucr.ac.cr                                      #
+#                                                                                                     #
+#######################################################################################################
+                                       *** START OF TEST ***  
+# File      : DataExploration.py
+# Date      : 07-02-2020
+# Start Time: 17:52:10
 
 
 Operation System: 

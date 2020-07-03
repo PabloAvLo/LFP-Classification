@@ -28,6 +28,7 @@ LOGS_FOLDER = RESULTS_FOLDER + "Logs/"
 CAPTURES_FOLDER = RESULTS_FOLDER + "Captures/"
 VERSIONS_LOG_PATH = LOGS_FOLDER + "versions_log.txt"
 YOMCHI_LOG_PATH = LOGS_FOLDER + "yomchi_log.txt"
+LINE_LENGTH = 100
 
 # Module Variables
 step_number = 1
@@ -84,7 +85,6 @@ def print_box(text):
     @param text: Text to print
     @return None
     """
-    line_length = 64
     text_length = len(text)
     counter = 0
     for i in range(0, text_length):
@@ -93,7 +93,7 @@ def print_box(text):
         else:
             counter += 1
 
-        if counter == 64:
+        if counter == LINE_LENGTH:
             if text[i] in ['a', 'e', 'i', 'o', 'u']:
                 text = text[:i - 1] + '-' + '\n' + text[i - 1:]
             else:
@@ -101,10 +101,10 @@ def print_box(text):
             counter = 0
 
     text_array = text.splitlines()
-    print_text("|" + "-" * (line_length + 2) + "|")
+    print_text("\n|" + "-" * (LINE_LENGTH + 2) + "|")
     for line in text_array:
-        print_text("| " + line.ljust(line_length, ' ') + " |")
-    print_text("|" + "-" * (line_length + 2) + "|")
+        print_text("| " + line.ljust(LINE_LENGTH, ' ') + " |")
+    print_text("|" + "-" * (LINE_LENGTH + 2) + "|")
 
 
 def step(description, new_step_number=0):
@@ -116,10 +116,13 @@ def step(description, new_step_number=0):
     """
     global step_number
 
+    larger_string = 7
+    pad = round((LINE_LENGTH - larger_string) / 2)
+
     if new_step_number != 0:
         step_number = new_step_number
 
-    print_box(" " * 28 + "Step " + str(step_number) + "\n" + description)
+    print_box(" " * pad + "Step " + str(step_number) + "\n" + description)
     step_number += 1
 
 
@@ -169,19 +172,48 @@ def log_versions():
 
 
 def print_header():
-    line_length = 63
-    header = "#" * line_length \
-             + "\n#" + " " * 14 + "                                 " + " " * 14 + "#" \
-             + "\n#" + " " * 14 + "    University of Costa Rica     " + " " * 14 + "#" \
-             + "\n#" + " " * 14 + "Electrical Engineering Department" + " " * 14 + "#" \
-             + "\n#" + " " * 14 + "          Grade Thesis           " + " " * 14 + "#" \
-             + "\n#" + " " * 14 + "      Pablo Avila [B30724]       " + " " * 14 + "#" \
-             + "\n#" + " " * 14 + "    jose.avilalopez@ucr.ac.cr    " + " " * 14 + "#" \
-             + "\n#" + " " * 14 + "                                 " + " " * 14 + "#" \
-             + "\n" + "#" * line_length \
-             + "\n" + " " * 14 + "     *** START OF TEST ***  "\
-             + "\n# File: " + caller_file \
-             + "\n# Date: " + START_TIME.strftime("%m-%d-%Y") \
-             + "\n# Time: " + START_TIME.strftime("%H:%M:%S") + "\n"
+    """
+    Print a header in the console output and log files.
+    @return None
+    """
+    larger_string = 33
+    pad = round((LINE_LENGTH - larger_string) / 2)
+    header = "#" * LINE_LENGTH + "#" * 3 \
+             + "\n#" + " " * pad + "                                 " + " " * pad + "#" \
+             + "\n#" + " " * pad + "    University of Costa Rica     " + " " * pad + "#" \
+             + "\n#" + " " * pad + "Electrical Engineering Department" + " " * pad + "#" \
+             + "\n#" + " " * pad + "          Grade Thesis           " + " " * pad + "#" \
+             + "\n#" + " " * pad + "      Pablo Avila [B30724]       " + " " * pad + "#" \
+             + "\n#" + " " * pad + "    jose.avilalopez@ucr.ac.cr    " + " " * pad + "#" \
+             + "\n#" + " " * pad + "                                 " + " " * pad + "#" \
+             + "\n" + "#" * LINE_LENGTH + "#" * 3 \
+             + "\n" + " " * pad + "     *** START OF TEST ***  "\
+             + "\n# File      : " + caller_file \
+             + "\n# Date      : " + START_TIME.strftime("%m-%d-%Y") \
+             + "\n# Start Time: " + START_TIME.strftime("%H:%M:%S") + "\n"
     print_text(header)
     versions_log.write(header)
+
+def finish_test():
+    """
+    Safely finish the test run and log some final information.
+    @return None
+    """
+    larger_string = 33
+    pad = round((LINE_LENGTH - larger_string) / 2)
+
+    finish_time = datetime.datetime.now()
+    elapsed_time = finish_time - START_TIME
+
+    days = elapsed_time.days
+    hours, rem = divmod(elapsed_time.seconds, 3600)
+    minutes, seconds = divmod(rem, 60)
+
+    footer = "\n" + "#" * LINE_LENGTH + "#" * 3 \
+             + "\n" + " " * pad + "     *** END OF TEST ***  " \
+             + "\n# Test Duration : " + str(days) + str(hours) + ":" + str(minutes) + ":" + str(seconds) \
+             + "\n# Finish Time   : " + finish_time.strftime("%H:%M:%S") \
+             + "\n" + "#" * LINE_LENGTH + "#" * 3
+
+    print_text(footer)
+    sys.exit()
