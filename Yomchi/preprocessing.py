@@ -34,13 +34,8 @@ LFP_NEURALYNX_SAMPLING_RATE = 1252   ## 1.252 kHz
 POSITION_DATA_SAMPLING_RATE = 39.06  ## 39.06 Hz
 EC014_41_NUMBER_OF_CHANNELS = 99     ## 16 shank probes with 8 electrodes each, minus bad channels.
 
-# Data Properties
-num_channels        = EC014_41_NUMBER_OF_CHANNELS
-lfp_SamplingRate    = LFP_DATAMAX_SAMPLING_RATE
-angles_SamplingRate = POSITION_DATA_SAMPLING_RATE
 
-
-def load_lfp_data(file=LFP_771, channels=num_channels):
+def load_lfp_data(file=LFP_771, channels=EC014_41_NUMBER_OF_CHANNELS):
     """
     Loads the LFP signals from a .eeg file (LFP Data only f < 625Hz) or a .dat file (LFP Data + Spikes).
     @param file: Path to the file containing the animal LFP data.
@@ -53,6 +48,7 @@ def load_lfp_data(file=LFP_771, channels=num_channels):
     signals = open(file, "rb")
     signalsArray = np.fromfile(file=signals, dtype=np.int16)
     lfp = np.reshape(signalsArray, (-1, channels))
+    signals.close()
 
     return lfp
 
@@ -71,6 +67,8 @@ def load_angles_data(file=ANGLES_771, degrees=True):
 
     positions_file = open(file, "rb")
     positions = np.genfromtxt(fname=positions_file, dtype=np.float16, delimiter='\t')
+    positions_file.close()
+
     positions[positions == -1] = np.NaN
     angles = np.arctan2((np.subtract(positions[:, 3], positions[:, 1])),
                         (np.subtract(positions[:, 2], positions[:, 0])))
@@ -104,12 +102,11 @@ def pad_angles(angles_data, orig_rate, new_rate):
     return resampled_data
 
 
-def interpolate_angles(angles_data, method="quadratic"):
+def interpolate_angles(angles_data, method="linear"):
     """
     Replace 'NaN' values in angular data with an interpolated value using a given method. Quadratic by default.
     @param angles_data: Array with the angles data extracted from the animal positions and Padded with
-    @param method: Interpolation method to fill the gaps in the data. The optional methods available are the
-    supported
+    @param method: Interpolation method to fill the gaps in the data. The optional methods available are the supported
     by pandas.DataFrame.interpolate function, which are: 'linear', 'quadratic', 'cubic', 'polynomial', among others.
     @return interpolated_angles: Original data filled with zeros to match the new sampling rate.
     """
@@ -156,9 +153,9 @@ def add_labels(lfps, angles):
     return labeled_data
 
 
-def clean_unsync_boundaries():
+def clean_unsync_boundaries(labeled_dataset):
     """
-    Clean the data rows wich have 'NaN' values as labels (anglres) from the beginning and end of the data.
+    Clean the data rows which have 'NaN' values as labels (angles) from the beginning and end of the data.
     @details At the beginning and at the end of the recording sessions, the LEDs of position are unsynchronized,
     hence '-1' values are used instead to denote invalid position data. These values were replaced by 'NaN' and are
     meant to be removed from the data since they are not representative labels.
@@ -167,6 +164,8 @@ def clean_unsync_boundaries():
     @return clean_dataset: Input data without 'NaN' values in the beginning nor the end.
     """
 
+    clean_dataset = labeled_dataset[~np.isnan(labeled_dataset[:, -1])]
+    return clean_dataset
 
 
 def series_to_windows(series, window_size, batch_size, shuffle_buffer, expand_series=False):

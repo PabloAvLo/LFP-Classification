@@ -19,6 +19,7 @@ import sys
 import inspect
 import platform
 import datetime
+import numpy as np
 
 # Module Constants
 START_TIME = datetime.datetime.now()
@@ -126,6 +127,34 @@ def step(description, new_step_number=0):
     step_number += 1
 
 
+def print_parameters(params_dictionary):
+    """
+    Print a list of parameters.
+    @param params_dictionary: Dictionary of parameters {name: value} to print.
+    @return None
+    """
+
+    pad = round((LINE_LENGTH - 18) / 2)
+    title = " " * pad + "*** Parameters ***"
+
+    names = list(params_dictionary.keys())
+    values = list(params_dictionary.values())
+    longest_name = max(names, key=len)
+
+    new_names = []
+    for name in names:
+        new_names.append(name + " " * (len(longest_name) - len(name)) + " : ")
+
+    new_dictionary = np.char.add(new_names, values)
+
+    print_text("\n|" + "-" * (LINE_LENGTH + 2) + "|")
+    print_text("| " + title.ljust(LINE_LENGTH, ' ') + " |")
+    print_text("| " + ''.ljust(LINE_LENGTH, ' ') + " |")
+    for param in new_dictionary:
+        print_text("| " + param.ljust(LINE_LENGTH, ' ') + " |")
+    print_text("|" + "-" * (LINE_LENGTH + 2) + "|\n")
+
+
 def log_versions():
     """
     Stores the environment versions including packages, libraries and OS.
@@ -194,11 +223,15 @@ def print_header():
     print_text(header)
     versions_log.write(header)
 
-def finish_test():
+def finish_test(rename_results_folder=None):
     """
     Safely finish the test run and log some final information.
+    @param rename_results_folder: Optional name for the results folder.
     @return None
     """
+    global yomchi_log
+    global versions_log
+
     larger_string = 33
     pad = round((LINE_LENGTH - larger_string) / 2)
 
@@ -216,4 +249,11 @@ def finish_test():
              + "\n" + "#" * LINE_LENGTH + "#" * 3
 
     print_text(footer)
+
+    yomchi_log.close()
+    versions_log.close()
+
+    if rename_results_folder is not None:
+        os.rename(RESULTS_FOLDER, CURRENT_FOLDER + "/" + rename_results_folder + "/")
+
     sys.exit()

@@ -18,165 +18,255 @@ import Yomchi.visualization as ui
 
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
+import pandas as pd
 
 ## <h1> Data Exploration </h1>
 # <h2> Experiment Setup </h2>
 # <ul>
 # <li> Initialize Environment
-# <li> Define parameters...
+# <li> Specify run configuration parameters.
+# <li> Specify session and methods parameters.
+# <li> Specify data properties parameters.
 # </ul>
 # <ol>
 Env.init_environment(True)
 
+# Run configuration parameters
 PLOT = True
 DONT_PLOT = False
+
+# Session and methods Parameters
+# session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES_771}  # or
+session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
+
+interpolation = "linear"  # "quadratic"
+sync_method = "Downsample LFPs"  # "Pad angles"
+
+# Data Properties
+num_channels = data.EC014_41_NUMBER_OF_CHANNELS
+rate_used = data.POSITION_DATA_SAMPLING_RATE
+if sync_method == "Pad angles":
+    rate_used = data.LFP_DATAMAX_SAMPLING_RATE
+
+Env.print_parameters({"Recording Session Number": session["Number"],
+                      "Interpolation Method": interpolation.title(),
+                      "Synchronization Method": sync_method,
+                      "Number of Recorded Channels": str(num_channels),
+                      "Sampling Rate to Use": str(rate_used) + "Hz"})
 
 ## <li> Step 1
 # <ul>
 # <li> Import LFP data.
 # <li> Plot channels 0 and 97.
 # </ul>
-Env.step("Importing LFP data.")
-lfp_data = data.load_lfp_data(data.LFP_771)
+Env.step("Importing LFP data from session: " + session["Number"])
+lfp_data = data.load_lfp_data(session["LFP Data"])
 
-if DONT_PLOT:
-    Env.print_text("Plotting LFP data from channels 0 and 97.")
-    plt.figure("LFP_Channels_0_and_97", figsize=ui.FIG_SIZE, dpi=ui.DPI)
+if PLOT:
+    Env.print_text("Plotting LFP data from channels 0 and 97 at " + str(data.LFP_DATAMAX_SAMPLING_RATE) + "Hz")
+    figname = session["Number"] + "_LFP_C0_and_C97_" + str(data.LFP_DATAMAX_SAMPLING_RATE) + "Hz"
+    plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
     plt.subplot(211)
     plt.plot(lfp_data[:, 0], "xr", markersize=1)
-    plt.title("Señal LFP del Canal 0")
+    plt.title("Señal LFP. Sesión: " + session["Number"] + " del Canal 0 a "
+              + str(data.LFP_DATAMAX_SAMPLING_RATE) + "Hz")
 
     plt.subplot(212)
     plt.plot(lfp_data[:, 97], "xb", markersize=1)
-    plt.title("Señal LFP del Canal 97")
-    ui.store_figure("LFP_Channels_0_and_97", "LFP_C0-C97.png")
+    plt.title("Señal LFP. Sesión: " + session["Number"] + " del Canal 97 a "
+              + str(data.LFP_DATAMAX_SAMPLING_RATE) + "Hz")
+    ui.store_figure(figname)
 
 ## <li> Step 2
-# <ul>
-# <li> Downsample LFP data to match Angles sampling rate.
-# <li> Plot channels 0 and 97 downsampled.
-# </ul>
-Env.step("Downsample LFP data to match Angles sampling rate.")
-
-lfp_data_downsampled = data.downsample_lfps(lfp_data, data.lfp_SamplingRate, data.angles_SamplingRate)
-
-if DONT_PLOT:
-    Env.print_text("Plotting LFP downsampled data to " + str(data.angles_SamplingRate) + "Hz from channels 0 and 97.")
-    plt.figure("LFP_downsampled_0_and_97", figsize=ui.FIG_SIZE, dpi=ui.DPI)
-    plt.subplot(211)
-    plt.plot(lfp_data_downsampled[:, 0], "xr", markersize=1)
-    plt.title("Señal LFP del Canal 0 a " + str(data.angles_SamplingRate) + "Hz.")
-
-    plt.subplot(212)
-    plt.plot(lfp_data_downsampled[:, 97], "xb", markersize=1)
-    plt.title("Señal LFP del Canal 97 a " + str(data.angles_SamplingRate) + "Hz.")
-    ui.store_figure("LFP_downsampled_0_and_97", "LFP_downsampled_C0-C97.png")
-
-## <li> Step 3
 # <ul>
 # <li> Import angles data.
 # <li> Plot angles data.
 # </ul>
-Env.step("Importing angles data")
+Env.step("Importing angles data from session: " + session["Number"])
 
-angles_data = data.load_angles_data(data.ANGLES_771)
+angles_data = data.load_angles_data(session["Angles Data"])
 
-if DONT_PLOT:
-    Env.print_text("Plotting Angles data [°]")
-    plt.figure("Angles_degrees", figsize=ui.FIG_SIZE, dpi=ui.DPI)
+if PLOT:
+    Env.print_text("Plotting Angles data [°] at " + str(data.POSITION_DATA_SAMPLING_RATE) + "Hz")
+    figname = session["Number"] + "_Angles_degrees_" + str(data.POSITION_DATA_SAMPLING_RATE) + "Hz"
+    plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
     plt.plot(angles_data[:], "xr", markersize=1)
-    plt.title("Información de ángulos [°]")
-    ui.store_figure("Angles_degrees", "angles_degrees.png")
+    plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + " a "
+              + str(data.POSITION_DATA_SAMPLING_RATE) + "Hz")
+    ui.store_figure(figname)
+
+if sync_method == "Downsample LFPs":
+    ## <li> Step 3
+    # <ul>
+    # <li> Downsample LFP data to match Angles sampling rate.
+    # <li> Plot channels 0 and 97 downsampled.
+    # </ul>
+    Env.step("Downsample LFP data to match Angles sampling rate.")
+
+    lfp_data = data.downsample_lfps(lfp_data, data.LFP_DATAMAX_SAMPLING_RATE, data.POSITION_DATA_SAMPLING_RATE)
+
+    if PLOT:
+        Env.print_text("Plotting LFP downsampled data to " + str(rate_used) + "Hz from channels 0 and 97.")
+        figname = session["Number"] + "_LFP_downsampled_0_and_97_" + str(rate_used) + "Hz"
+        plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+        plt.subplot(211)
+        plt.plot(lfp_data[:, 0], "xr", markersize=1)
+        plt.title("Señal LFP del Canal 0 a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
+
+        plt.subplot(212)
+        plt.plot(lfp_data[:, 97], "xb", markersize=1)
+        plt.title("Señal LFP del Canal 97 a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
+        ui.store_figure(figname)
+
+elif sync_method == "Pad angles":
+    ## <li> Step 3
+    # <ul>
+    # <li> Fill angles gaps to match the LFP sampling rate.
+    # <li> Plot angles data in the new sampling rate.
+    # </ul>
+    Env.step("Pad angles data to reach a higher sampling rate")
+
+    angles_data = data.pad_angles(angles_data, data.POSITION_DATA_SAMPLING_RATE, data.LFP_DATAMAX_SAMPLING_RATE)
+
+    if PLOT:
+        Env.print_text("Plotting Angles data padded with 'NaN' [°]")
+        figname = session["Number"] + "_Angles_padded_degrees_" + str(rate_used) + "Hz"
+        plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+        plt.plot(angles_data[:], "xb", markersize=1)
+        plt.title("Información de ángulos [°] rellena a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
+        ui.store_figure(figname)
 
 ## <li> Step 4
 # <ul>
-# <li> Fill angles gaps to match the LFP sampling rate.
-# <li> Plot angles data in the new sampling rate.
+# <li> Interpolate angles data using a 'interpolation' approach.
+# <li> Plot angles data after interpolation.
 # </ul>
-Env.step("Pad angles data to reach a higher sampling rate")
+Env.step("Interpolate angles data using a " + interpolation + " approach.", 4)
 
-angles_data_filled = data.pad_angles(angles_data, data.angles_SamplingRate, data.lfp_SamplingRate)
+angles_data_interpolated = data.interpolate_angles(angles_data, interpolation)
 
-if DONT_PLOT:
-    Env.print_text("Plotting Angles data padded with 'NaN' [°]")
-    plt.figure("Angles_padded_degrees", figsize=ui.FIG_SIZE, dpi=ui.DPI)
-    plt.plot(angles_data_filled[:], "xb", markersize=1)
-    plt.title("Información de ángulos a " + str(data.lfp_SamplingRate) + "Hz. [°]")
-    ui.store_figure("Angles_padded_degrees", "angles_padded_degrees.png")
+if PLOT:
+    Env.print_text("Plotting Angles data after " + interpolation + " interpolation [°]")
+    figname = session["Number"] + "_Angles_" + interpolation + "_degrees_" + str(rate_used) + "Hz"
+    plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+    plt.plot(angles_data_interpolated[:], "xr", markersize=1)
+    plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + ". Interpolada con: " + interpolation
+              + " a " + str(rate_used) + "Hz")
+    ui.store_figure(figname)
 
 ## <li> Step 5
 # <ul>
-# <ul>
-# <li> Interpolate original and padded angles data using a 'quadratic' approach.
-# <li> Plot original and padded angles data after quadratic interpolation.
+# <li> Label data by concatenating LFPs and interpolated Angles in a single 2D-array.
+# <li> Plot LFP and angles data.
+# <li> Print an angles data window where the first LED is unsynchronized and then the second LED is lost too.
 # </ul>
-Env.step("Interpolate original and padded angles data using a 'quadratic' approach.")
+Env.step("Label data by concatenating LFPs and interpolated Angles in a single 2D-array.")
 
-angles_data_interpolated = data.interpolate_angles(angles_data, "quadratic")
-angles_data_filled_interpolated = data.interpolate_angles(angles_data_filled, "quadratic")
+labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1))
 
-if DONT_PLOT:
-    Env.print_text("Plotting original Angles data after interpolation [°]")
-    plt.figure("Angles_inter_degrees", figsize=ui.FIG_SIZE, dpi=ui.DPI)
-    plt.plot(angles_data_interpolated[:], "xr", markersize=1)
-    plt.title("Información de ángulos interpolada. [°]")
-    ui.store_figure("Angles_inter_degrees", "angles_inter_degrees.png")
+if PLOT:
+    Env.print_text("Plotting LFP data from channels 0 and interpolated angles data at " + str(rate_used) + "Hz. [°]")
+    figname = session["Number"] + "_LFP_C0_and_angles_" + interpolation + "_" + str(rate_used) + "Hz"
+    plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+    plt.subplot(211)
+    plt.plot(labeled_data[:-1, 0], "xr", markersize=1)
+    plt.title("Señal LFP del Canal 0. Muestreada a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
 
-    Env.print_text("Plotting padded Angles data after interpolation [°]")
-    plt.figure("Angles_padded_inter_degrees", figsize=ui.FIG_SIZE, dpi=ui.DPI)
-    plt.plot(angles_data_filled_interpolated[:], "xb", markersize=1)
-    plt.title("Información de ángulos a " + str(data.lfp_SamplingRate) + "Hz interpolada. [°]")
-    ui.store_figure("Angles_padded_inter_degrees", "angles_padded_inter_degrees.png")
+    plt.subplot(212)
+    plt.plot(labeled_data[:, -1], "xb", markersize=1)
+    plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + ". Interpolada con: " + interpolation
+              + " a " + str(rate_used) + "Hz")
+    ui.store_figure(figname)
+
+if session["Number"] == "771" and sync_method == "Downsample LFPs":
+    Env.print_text("\nAngles Data from: 15560 to 15600 where at 15566 the first LED is lost and at 15583 both are lost")
+    Env.print_text(' '.join([str(elem) for elem in angles_data[15560:15600]]))
+
+    Env.print_text("\nAngles Data Interpolated from: 15560 to 15600 where at 15566 the first LED is lost and at 15583 "
+                   "both are lost.")
+    Env.print_text(' '.join([str(elem) for elem in labeled_data[15560:15600, -1]]))
 
 ## <li> Step 6
 # <ul>
-# <li> Label data by concatenating LFPs and padded, interpolated Angles in a single 2D-array.
-# <li> Plot LFP and angles data.
+# <li> Clean the labeled dataset from NaN values at the boundaries.
+# <li> Print some NaN counts in different dataset stages.
+# <li> Plot LFP and angles data already clean.
 # </ul>
-Env.step("Label data by concatenating LFPs and padded, interpolated Angles in a single 2D-array.")
+Env.step("Clean the labeled dataset from NaN values at the boundaries.")
 
-labeled_data_filled = data.add_labels(lfp_data, np.expand_dims(angles_data_filled_interpolated, axis=1))
+Env.print_text("Number of NaNs in Angles Data without interpolation: " + str(np.count_nonzero(np.isnan(angles_data))))
+Env.print_text("Number of NaNs in Labeled Dataset with interpolated Angles Data: "
+               + str(np.count_nonzero(np.isnan(labeled_data))))
 
-if DONT_PLOT:
-    Env.print_text("Plotting LFP data from channels 0 and padded, interpolated angles data at "
-                   + str(data.lfp_SamplingRate) + "Hz. [°]")
+nans_begin = 0
+nans_end = 0
+length = len(labeled_data)
+for i in range(length):
+    if ~np.isnan(labeled_data[i, -1]):
+        nans_begin = i
+        break
+Env.print_text("Number of NaNs at the beginning of the interpolated Angles Data: " + str(nans_begin))
 
-    plt.figure("LFP_C0_and_angles_inter_padded_39Hz", figsize=ui.FIG_SIZE, dpi=ui.DPI)
+for i in range(length-1, 0, -1):
+    if ~np.isnan(labeled_data[i, -1]):
+        nans_end = i
+        break
+
+nans_end = length - (nans_end + 1)
+Env.print_text("Number of NaNs at the end of the interpolated Angles Data: " + str(nans_end))
+
+clean_dataset = data.clean_unsync_boundaries(labeled_data)
+Env.print_text("Number of NaNs in Labeled and Clean Dataset with interpolated Angles Data: "
+               + str(np.count_nonzero(np.isnan(clean_dataset))))
+
+if PLOT:
+    Env.print_text("Plotting clean LFP data from channels 0 and interpolated angles data at "
+                   + str(rate_used) + "Hz. [°]")
+    figname = session["Number"] + "_LFP_C0_clean_and_angles_" + interpolation + "_" + str(rate_used) + "Hz"
+    plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
     plt.subplot(211)
-    plt.plot(labeled_data_filled[:-1, 0], "xr", markersize=1)
-    plt.title("Señal LFP del Canal 0 muestreada a " + str(data.lfp_SamplingRate) + "Hz")
-
+    plt.plot(labeled_data[:-1, 0], "xr", markersize=1)
+    plt.title("Señal LFP del Canal 0 limpia. Muestreada a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
     plt.subplot(212)
-    plt.plot(labeled_data_filled[:, -1], "xb", markersize=1)
-    plt.title("Información de ángulos a " + str(data.lfp_SamplingRate) + "Hz interpolada y rellena. [°]")
-    ui.store_figure("LFP_C0_and_angles_inter_padded_39Hz", "LFP_C0_and_angles_inter_padded_39Hz.png")
+    plt.plot(labeled_data[:, -1], "xb", markersize=1)
+    plt.title("Información de ángulos [°] limpia. Sesión: " + session["Number"] + ". Interpolada con: "
+              + interpolation + " a " + str(rate_used) + "Hz")
+    ui.store_figure(figname)
+
 
 ## <li> Step 7
 # <ul>
-# <li> Label data by concatenating downsampled LFPs and interpolated Angles in a single 2D-array.
-# <li> Plot LFP and angles data.
+# <li> Discretize the angles into bins
+# <li> Box plot the angles data
 # </ul>
-Env.step("Label data by concatenating downsampled LFPs and interpolated Angles in a single 2D-array.")
 
-labeled_data_downsampled = data.add_labels(lfp_data_downsampled, np.expand_dims(angles_data_interpolated, axis=1))
+angles = labeled_data[:, -1]
+a = angles[(-180 <= angles) & (angles< -150)]
+angles_separated = {
+                    "-180 to -150": angles[(-180 <= angles) & (angles< -150)],
+                    "-150 to -120": angles[(-150 <= angles) & (angles< -120)],
+                    "-120 to -90" : angles[(-120 <= angles) & (angles< -90)],
+                    "-90 to -60"  : angles[(-90  <= angles) & (angles< -60)],
+                    "-60 to -30"  : angles[(-60  <= angles) & (angles< -30)],
+                    "-30 to 0"    : angles[(-30  <= angles) & (angles< 0)],
+                    "0 to 30"     : angles[(0    <= angles) & (angles< 30)],
+                    "30 to 60"    : angles[(30   <= angles) & (angles< 60)],
+                    "60 to 90"    : angles[(60   <= angles) & (angles< 90)],
+                    "90 to 120"   : angles[(90   <= angles) & (angles< 120)],
+                    "120 to 150"  : angles[(120  <= angles) & (angles< 150)],
+                    "150 to 180"  : angles[(150  <= angles) & (angles<= 180)]}
 
-# print(angles_data[15560:15600])
-# print(labeled_data_downsampled[15560:15600, -1])
+df = pd.DataFrame(angles_separated, columns=["-150 to -120", "-120 to -90", "-90 to -60", "-60 to -30", "-30 to 0",
+                                             "0 to 30", "30 to 60", "60 to 90", "90 to 120", "120 to 150", "150 to 180"])
 
-if DONT_PLOT:
-    Env.print_text("Plotting downsampled LFP data from channels 0 and interpolated angles data at "
-                   + str(data.angles_SamplingRate) + "Hz. [°]")
+for col in df.select_dtypes(include='object').columns:
+    pd.value_counts(df[col]).plot.barh()
+    plt.title(col)
+    plt.show()
 
-    plt.figure("LFP_C0_down_and_angles_inter_39Hz", figsize=ui.FIG_SIZE, dpi=ui.DPI)
-    plt.subplot(211)
-    plt.plot(labeled_data_downsampled[:-1, 0], "xr", markersize=1)
-    plt.title("Señal LFP del Canal 0 muestreada a " + str(data.angles_SamplingRate) + "Hz")
-
-    plt.subplot(212)
-    plt.plot(labeled_data_downsampled[:, -1], "xb", markersize=1)
-    plt.title("Información de ángulos a " + str(data.angles_SamplingRate) + "Hz interpolada. [°]")
-    ui.store_figure("LFP_C0_down_and_angles_inter_39Hz", "LFP_C0_down_and_angles_inter_39Hz.png")
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>
 Env.finish_test()
+# Env.finish_test(session["Number"] + "_" + interpolation.title() + "_" + sync_method.replace(" ", ""))
