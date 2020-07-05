@@ -189,11 +189,17 @@ if session["Number"] == "771" and sync_method == "Downsample LFPs":
 
 ## <li> Step 6
 # <ul>
-# <li> Clean the labeled dataset from NaN values at the boundaries.
+# <li> Convert labeled dataset to a dataframe.
+# <li> Clean both, the labeled dataset and dataframe from NaN values at the boundaries.
 # <li> Print some NaN counts in different dataset stages.
 # <li> Plot LFP and angles data already clean.
 # </ul>
 Env.step("Clean the labeled dataset from NaN values at the boundaries.")
+
+dataframe = data.ndarray_to_dataframe(labeled_data, rate_used)
+
+clean_frame = data.clean_unsync_boundaries(dataframe)
+clean_dataset = data.clean_unsync_boundaries(labeled_data, False)
 
 Env.print_text("Number of NaNs in Angles Data without interpolation: " + str(np.count_nonzero(np.isnan(angles_data))))
 Env.print_text("Number of NaNs in Labeled Dataset with interpolated Angles Data: "
@@ -216,9 +222,10 @@ for i in range(length-1, 0, -1):
 nans_end = length - (nans_end + 1)
 Env.print_text("Number of NaNs at the end of the interpolated Angles Data: " + str(nans_end))
 
-clean_dataset = data.clean_unsync_boundaries(labeled_data)
 Env.print_text("Number of NaNs in Labeled and Clean Dataset with interpolated Angles Data: "
                + str(np.count_nonzero(np.isnan(clean_dataset))))
+Env.print_text("Number of NaNs in Labeled and Clean DataFRAME with interpolated Angles Data: "
+               + str(np.count_nonzero(np.isnan(clean_frame))))
 
 if PLOT:
     Env.print_text("Plotting clean LFP data from channels 0 and interpolated angles data at "
@@ -233,7 +240,6 @@ if PLOT:
     plt.title("Información de ángulos [°] limpia. Sesión: " + session["Number"] + ". Interpolada con: "
               + interpolation + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname)
-
 
 ## <li> Step 7
 # <ul>

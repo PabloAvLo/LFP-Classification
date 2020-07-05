@@ -104,7 +104,7 @@ def pad_angles(angles_data, orig_rate, new_rate):
 
 def interpolate_angles(angles_data, method="linear"):
     """
-    Replace 'NaN' values in angular data with an interpolated value using a given method. Quadratic by default.
+    Replace 'NaN' values in angular data with an interpolated value using a given method.
     @param angles_data: Array with the angles data extracted from the animal positions and Padded with
     @param method: Interpolation method to fill the gaps in the data. The optional methods available are the supported
     by pandas.DataFrame.interpolate function, which are: 'linear', 'quadratic', 'cubic', 'polynomial', among others.
@@ -153,7 +153,7 @@ def add_labels(lfps, angles):
     return labeled_data
 
 
-def clean_unsync_boundaries(labeled_dataset):
+def clean_unsync_boundaries(labeled_dataset, is_dataframe=True):
     """
     Clean the data rows which have 'NaN' values as labels (angles) from the beginning and end of the data.
     @details At the beginning and at the end of the recording sessions, the LEDs of position are unsynchronized,
@@ -161,11 +161,38 @@ def clean_unsync_boundaries(labeled_dataset):
     meant to be removed from the data since they are not representative labels.
     @param labeled_dataset: Matrix [n x (numChannels +1)] with the LFP signals used as the preliminary features of the
     data and the angles data extracted from the positions used as the labels of the data.
+    @param is_dataframe: If set, manage the input labeled dataset as a Pandas Dataframe, or a Numpy array otherwise.
     @return clean_dataset: Input data without 'NaN' values in the beginning nor the end.
     """
 
-    clean_dataset = labeled_dataset[~np.isnan(labeled_dataset[:, -1])]
+    if is_dataframe:
+        clean_dataset = labeled_dataset[~np.isnan(labeled_dataset["Angle"])]
+    else:
+        clean_dataset = labeled_dataset[~np.isnan(labeled_dataset[:, -1])]
+
     return clean_dataset
+
+
+def ndarray_to_dataframe(dataset, rate):
+    """
+    Converts an n-D Numpy array to a Pandas Dataframe
+    @param dataset: Matrix [n x (numChannels +1)] with the LFP signals used as the preliminary features
+    of the data and the angles data extracted from the positions used as the labels of the data.
+    @param rate:
+    @return dataframe: Pandas data frame with Electrode_0-99 and Angles as columns names, and the timestamp as indeces
+    calculated as 1/rate * 1e6 to get the time step of the acquisition in microseconds.
+    """
+
+    columns = []
+    for i in range(1, 100):
+        columns.append("Electrode_" + str(i))
+    columns.append("Angle")
+
+    time_step = round((1/rate) * 1e6)   # 1/f [us]: 1250Hz => 800us, 39.006Hz => 25601us
+    indeces = np.arange(0, len(dataset) * time_step, time_step)
+    dataframe = pd.DataFrame(data=dataset, columns=columns, index=indeces)
+
+    return dataframe
 
 
 def series_to_windows(series, window_size, batch_size, shuffle_buffer, expand_series=False):
