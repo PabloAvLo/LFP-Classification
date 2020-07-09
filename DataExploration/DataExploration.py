@@ -37,16 +37,16 @@ PLOT = True
 DONT_PLOT = False
 
 # Session and methods Parameters
-# session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES_771}  # or
-session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
+session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES_771}  # or
+#session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
 
-interpolation = "linear"  # "quadratic"
-sync_method = "Downsample LFPs"  # "Pad angles"
+interpolation = "linear"  # "linear" "quadratic" "cubic" "nearest"
+sync_method = "Downsample LFPs"  #  "Pad Angles" "Downsample LFPs"
 
 # Data Properties
 num_channels = data.EC014_41_NUMBER_OF_CHANNELS
 rate_used = data.POSITION_DATA_SAMPLING_RATE
-if sync_method == "Pad angles":
+if sync_method == "Pad Angles":
     rate_used = data.LFP_DATAMAX_SAMPLING_RATE
 
 Env.print_parameters({"Recording Session Number": session["Number"],
@@ -119,13 +119,13 @@ if sync_method == "Downsample LFPs":
         plt.title("Señal LFP del Canal 97 a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
         ui.store_figure(figname)
 
-elif sync_method == "Pad angles":
+elif sync_method == "Pad Angles":
     ## <li> Step 3
     # <ul>
     # <li> Fill angles gaps to match the LFP sampling rate.
     # <li> Plot angles data in the new sampling rate.
     # </ul>
-    Env.step("Pad angles data to reach a higher sampling rate")
+    Env.step("Pad Angles data to reach a higher sampling rate")
 
     angles_data = data.pad_angles(angles_data, data.POSITION_DATA_SAMPLING_RATE, data.LFP_DATAMAX_SAMPLING_RATE)
 
@@ -193,6 +193,7 @@ if session["Number"] == "771" and sync_method == "Downsample LFPs":
 # <li> Clean both, the labeled dataset and dataframe from NaN values at the boundaries.
 # <li> Print some NaN counts in different dataset stages.
 # <li> Plot LFP and angles data already clean.
+# <li> Plot a Box Plot of the 99 Channels plus the angles
 # </ul>
 Env.step("Clean the labeled dataset from NaN values at the boundaries.")
 
@@ -241,38 +242,44 @@ if PLOT:
               + interpolation + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname)
 
-## <li> Step 7
-# <ul>
-# <li> Discretize the angles into bins
-# <li> Box plot the angles data
-# </ul>
 
-angles = labeled_data[:, -1]
-a = angles[(-180 <= angles) & (angles< -150)]
-angles_separated = {
-                    "-180 to -150": angles[(-180 <= angles) & (angles< -150)],
-                    "-150 to -120": angles[(-150 <= angles) & (angles< -120)],
-                    "-120 to -90" : angles[(-120 <= angles) & (angles< -90)],
-                    "-90 to -60"  : angles[(-90  <= angles) & (angles< -60)],
-                    "-60 to -30"  : angles[(-60  <= angles) & (angles< -30)],
-                    "-30 to 0"    : angles[(-30  <= angles) & (angles< 0)],
-                    "0 to 30"     : angles[(0    <= angles) & (angles< 30)],
-                    "30 to 60"    : angles[(30   <= angles) & (angles< 60)],
-                    "60 to 90"    : angles[(60   <= angles) & (angles< 90)],
-                    "90 to 120"   : angles[(90   <= angles) & (angles< 120)],
-                    "120 to 150"  : angles[(120  <= angles) & (angles< 150)],
-                    "150 to 180"  : angles[(150  <= angles) & (angles<= 180)]}
+figname = session["Number"] + "_BoxPLot1-50_" + interpolation + "_" + str(rate_used) + "Hz"
+plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+sns.boxplot(data=clean_frame.iloc[:, 0:50])
+plt.xlabel("Canales")
+plt.ylabel("Voltaje")
+plt.title("Diagrama de caja de los canales 1-50.\nSesión: " + session["Number"] + ". Interpolada con: "
+          + interpolation + " a " + str(rate_used) + "Hz")
+ui.store_figure(figname)
 
-df = pd.DataFrame(angles_separated, columns=["-150 to -120", "-120 to -90", "-90 to -60", "-60 to -30", "-30 to 0",
-                                             "0 to 30", "30 to 60", "60 to 90", "90 to 120", "120 to 150", "150 to 180"])
+figname = session["Number"] + "_BoxPLot51-99_" + interpolation + "_" + str(rate_used) + "Hz"
+plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+sns.boxplot(data=clean_frame.iloc[:, 50:99])
+plt.xlabel("Canales")
+plt.ylabel("Voltaje")
+plt.title("Diagrama de caja de los canales 51-99.\nSesión: " + session["Number"] + ". Interpolada con: "
+          + interpolation + " a " + str(rate_used) + "Hz")
+ui.store_figure(figname)
 
-for col in df.select_dtypes(include='object').columns:
-    pd.value_counts(df[col]).plot.barh()
-    plt.title(col)
-    plt.show()
+figname = session["Number"] + "_BoxPLotAngles_" + interpolation + "_" + str(rate_used) + "Hz"
+plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+sns.boxplot(y=clean_frame["Angle"])
+plt.xlabel("Muestras")
+plt.ylabel("Ángulos")
+plt.title("Diagrama de caja de los ángulos.\nSesión: " + session["Number"] + ". Interpolada con: "
+          + interpolation + " a " + str(rate_used) + "Hz")
+ui.store_figure(figname)
 
+figname = session["Number"] + "_BoxPLotC0vsAngles_" + interpolation + "_" + str(rate_used) + "Hz"
+plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+sns.boxplot(x=clean_frame["1"], y=clean_frame["Angle"])
+plt.xlabel("Muestras")
+plt.ylabel("Ángulos")
+plt.title("Diagrama de caja del canal 0 contra los ángulos.\nSesión: " + session["Number"] + ". Interpolada con: "
+          + interpolation + " a " + str(rate_used) + "Hz")
+ui.store_figure(figname, True)
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>
 Env.finish_test()
-# Env.finish_test(session["Number"] + "_" + interpolation.title() + "_" + sync_method.replace(" ", ""))
+#Env.finish_test(session["Number"] + "_" + interpolation.title() + "_" + sync_method.replace(" ", ""))

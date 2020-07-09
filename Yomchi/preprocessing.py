@@ -185,7 +185,8 @@ def ndarray_to_dataframe(dataset, rate):
 
     columns = []
     for i in range(1, 100):
-        columns.append("Electrode_" + str(i))
+        #columns.append("Electrode_" + str(i))
+        columns.append(str(i))
     columns.append("Angle")
 
     time_step = round((1/rate) * 1e6)   # 1/f [us]: 1250Hz => 800us, 39.006Hz => 25601us

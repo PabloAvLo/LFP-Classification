@@ -9,15 +9,15 @@
 #######################################################################################################
                                        *** START OF TEST ***  
 # File      : DataExploration.py
-# Date      : 07-08-2020
-# Start Time: 22:26:24
+# Date      : 07-06-2020
+# Start Time: 18:47:07
 
 
 |------------------------------------------------------------------------------------------------------|
 |                                          *** Parameters ***                                          |
 |                                                                                                      |
-| Recording Session Number    : 765                                                                    |
-| Interpolation Method        : Linear                                                                 |
+| Recording Session Number    : 771                                                                    |
+| Interpolation Method        : Nearest                                                                |
 | Synchronization Method      : Downsample LFPs                                                        |
 | Number of Recorded Channels : 99                                                                     |
 | Sampling Rate to Use        : 39.06Hz                                                                |
@@ -26,16 +26,16 @@
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 1                                                 |
-| Importing LFP data from session: 765                                                                 |
+| Importing LFP data from session: 771                                                                 |
 |------------------------------------------------------------------------------------------------------|
-Loading LFP Data of 99 channels from: ec014.765.eeg.
+Loading LFP Data of 99 channels from: ec014.771.eeg.
 Plotting LFP data from channels 0 and 97 at 1250Hz
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 2                                                 |
-| Importing angles data from session: 765                                                              |
+| Importing angles data from session: 771                                                              |
 |------------------------------------------------------------------------------------------------------|
-Loading the animal position data from: ec014.765.whl.
+Loading the animal position data from: ec014.771.whl.
 Plotting Angles data [°] at 39.06Hz
 
 |------------------------------------------------------------------------------------------------------|
@@ -47,32 +47,38 @@ Plotting LFP downsampled data to 39.06Hz from channels 0 and 97.
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 4                                                 |
-| Interpolate angles data using a linear approach.                                                     |
+| Interpolate angles data using a nearest approach.                                                    |
 |------------------------------------------------------------------------------------------------------|
-Interpolate angles data using linear method.
-Plotting Angles data after linear interpolation [°]
+Interpolate angles data using nearest method.
+Plotting Angles data after nearest interpolation [°]
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 5                                                 |
 | Label data by concatenating LFPs and interpolated Angles in a single 2D-array.                       |
 |------------------------------------------------------------------------------------------------------|
-Adding labels to the data by concatenating the [109825 x 99] LFP data matrix with the [109825] Angles vector.
+Adding labels to the data by concatenating the [107297 x 99] LFP data matrix with the [107297] Angles vector.
 Plotting LFP data from channels 0 and interpolated angles data at 39.06Hz. [°]
+
+Angles Data from: 15560 to 15600 where at 15566 the first LED is lost and at 15583 both are lost
+109.9 110.5 113.44 113.7 114.06 111.8 nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan
+
+Angles Data Interpolated from: 15560 to 15600 where at 15566 the first LED is lost and at 15583 both are lost.
+109.875 110.5 113.4375 113.6875 114.0625 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125 111.8125
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 6                                                 |
 | Clean the labeled dataset from NaN values at the boundaries.                                         |
 |------------------------------------------------------------------------------------------------------|
-Number of NaNs in Angles Data without interpolation: 7671
-Number of NaNs in Labeled Dataset with interpolated Angles Data: 1977
-Number of NaNs at the beginning of the interpolated Angles Data: 1977
-Number of NaNs at the end of the interpolated Angles Data: 0
+Number of NaNs in Angles Data without interpolation: 25545
+Number of NaNs in Labeled Dataset with interpolated Angles Data: 1386
+Number of NaNs at the beginning of the interpolated Angles Data: 932
+Number of NaNs at the end of the interpolated Angles Data: 454
 Number of NaNs in Labeled and Clean Dataset with interpolated Angles Data: 0
 Number of NaNs in Labeled and Clean DataFRAME with interpolated Angles Data: 0
 Plotting clean LFP data from channels 0 and interpolated angles data at 39.06Hz. [°]
 
 #######################################################################################################
                                        *** END OF TEST ***  
-# Test Duration : 00:0:11
-# Finish Time   : 22:26:36
+# Test Duration : 00:0:10
+# Finish Time   : 18:47:18
 #######################################################################################################
