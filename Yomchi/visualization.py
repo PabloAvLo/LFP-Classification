@@ -16,16 +16,28 @@ import matplotlib.pyplot as plt
 import Yomchi.Environment as Env
 import numpy as np
 
-# Figures parameters
-
-DPI = 200
-FIG_SIZE = [12, 9]
-FIG_FORMAT = "png"
+# Matplotlib figures parameters
+FIG_FORMAT = 'png'
+plt.rcParams['figure.dpi'] = 200
+plt.rcParams['figure.figsize'] = [12, 8]
+plt.rcParams['savefig.format'] = FIG_FORMAT
+plt.rcParams['lines.markersize'] = 1
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.size'] = 18
+plt.rcParams['figure.autolayout'] = True
+plt.rcParams['axes.titlepad'] = 7
 
 
 def store_figure(fig_name, show=False):
+    """
+    Stores a figure.
+    @param fig_name: Name of the figure to store.
+    @param show: Displays the figure when ready. Warning: Stalls execution until closing it.
+    @return None
+    """
+
     plt.figure(fig_name)
-    plt.savefig(fname=Env.CAPTURES_FOLDER + fig_name + "." + FIG_FORMAT, dpi=DPI, format=FIG_FORMAT)
+    plt.savefig(fname=Env.CAPTURES_FOLDER + fig_name + "." + FIG_FORMAT)
     if show:
         plt.show()
     plt.close(fig_name)

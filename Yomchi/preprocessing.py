@@ -184,12 +184,11 @@ def ndarray_to_dataframe(dataset, rate):
     """
 
     columns = []
-    for i in range(1, 100):
-        #columns.append("Electrode_" + str(i))
-        columns.append(str(i))
+    for i in range(0, 99):
+        columns.append("E" + str(i))
     columns.append("Angle")
 
-    time_step = round((1/rate) * 1e6)   # 1/f [us]: 1250Hz => 800us, 39.006Hz => 25601us
+    time_step = round((1/rate) * 1e6)   # 1/f [us]: 1250Hz => 800us, 39.006Hz => 25602us
     indeces = np.arange(0, len(dataset) * time_step, time_step)
     dataframe = pd.DataFrame(data=dataset, columns=columns, index=indeces)
 

@@ -41,7 +41,7 @@ session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES
 #session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
 
 interpolation = "linear"  # "linear" "quadratic" "cubic" "nearest"
-sync_method = "Downsample LFPs"  #  "Pad Angles" "Downsample LFPs"
+sync_method = "Downsample LFPs"  # "Pad Angles" "Downsample LFPs"
 
 # Data Properties
 num_channels = data.EC014_41_NUMBER_OF_CHANNELS
@@ -66,14 +66,14 @@ lfp_data = data.load_lfp_data(session["LFP Data"])
 if PLOT:
     Env.print_text("Plotting LFP data from channels 0 and 97 at " + str(data.LFP_DATAMAX_SAMPLING_RATE) + "Hz")
     figname = session["Number"] + "_LFP_C0_and_C97_" + str(data.LFP_DATAMAX_SAMPLING_RATE) + "Hz"
-    plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+    plt.figure(figname)
     plt.subplot(211)
-    plt.plot(lfp_data[:, 0], "xr", markersize=1)
+    plt.plot(lfp_data[:, 0], "xr")
     plt.title("Señal LFP. Sesión: " + session["Number"] + " del Canal 0 a "
               + str(data.LFP_DATAMAX_SAMPLING_RATE) + "Hz")
 
     plt.subplot(212)
-    plt.plot(lfp_data[:, 97], "xb", markersize=1)
+    plt.plot(lfp_data[:, 97], "xb")
     plt.title("Señal LFP. Sesión: " + session["Number"] + " del Canal 97 a "
               + str(data.LFP_DATAMAX_SAMPLING_RATE) + "Hz")
     ui.store_figure(figname)
@@ -90,8 +90,8 @@ angles_data = data.load_angles_data(session["Angles Data"])
 if PLOT:
     Env.print_text("Plotting Angles data [°] at " + str(data.POSITION_DATA_SAMPLING_RATE) + "Hz")
     figname = session["Number"] + "_Angles_degrees_" + str(data.POSITION_DATA_SAMPLING_RATE) + "Hz"
-    plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
-    plt.plot(angles_data[:], "xr", markersize=1)
+    plt.figure(figname)
+    plt.plot(angles_data[:], "xr")
     plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + " a "
               + str(data.POSITION_DATA_SAMPLING_RATE) + "Hz")
     ui.store_figure(figname)
@@ -109,13 +109,13 @@ if sync_method == "Downsample LFPs":
     if PLOT:
         Env.print_text("Plotting LFP downsampled data to " + str(rate_used) + "Hz from channels 0 and 97.")
         figname = session["Number"] + "_LFP_downsampled_0_and_97_" + str(rate_used) + "Hz"
-        plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+        plt.figure(figname)
         plt.subplot(211)
-        plt.plot(lfp_data[:, 0], "xr", markersize=1)
+        plt.plot(lfp_data[:, 0], "xr")
         plt.title("Señal LFP del Canal 0 a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
 
         plt.subplot(212)
-        plt.plot(lfp_data[:, 97], "xb", markersize=1)
+        plt.plot(lfp_data[:, 97], "xb")
         plt.title("Señal LFP del Canal 97 a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
         ui.store_figure(figname)
 
@@ -132,8 +132,8 @@ elif sync_method == "Pad Angles":
     if PLOT:
         Env.print_text("Plotting Angles data padded with 'NaN' [°]")
         figname = session["Number"] + "_Angles_padded_degrees_" + str(rate_used) + "Hz"
-        plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
-        plt.plot(angles_data[:], "xb", markersize=1)
+        plt.figure(figname)
+        plt.plot(angles_data[:], "xb")
         plt.title("Información de ángulos [°] rellena a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
         ui.store_figure(figname)
 
@@ -149,9 +149,9 @@ angles_data_interpolated = data.interpolate_angles(angles_data, interpolation)
 if PLOT:
     Env.print_text("Plotting Angles data after " + interpolation + " interpolation [°]")
     figname = session["Number"] + "_Angles_" + interpolation + "_degrees_" + str(rate_used) + "Hz"
-    plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
-    plt.plot(angles_data_interpolated[:], "xr", markersize=1)
-    plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + ". Interpolada con: " + interpolation
+    plt.figure(figname)
+    plt.plot(angles_data_interpolated[:], "xr")
+    plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + ".\n Interpolada con: " + interpolation
               + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname)
 
@@ -168,14 +168,14 @@ labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated
 if PLOT:
     Env.print_text("Plotting LFP data from channels 0 and interpolated angles data at " + str(rate_used) + "Hz. [°]")
     figname = session["Number"] + "_LFP_C0_and_angles_" + interpolation + "_" + str(rate_used) + "Hz"
-    plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+    plt.figure(figname)
     plt.subplot(211)
-    plt.plot(labeled_data[:-1, 0], "xr", markersize=1)
+    plt.plot(labeled_data[:-1, 0], "xr")
     plt.title("Señal LFP del Canal 0. Muestreada a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
 
     plt.subplot(212)
-    plt.plot(labeled_data[:, -1], "xb", markersize=1)
-    plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + ". Interpolada con: " + interpolation
+    plt.plot(labeled_data[:, -1], "xb")
+    plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + ".\n Interpolada con: " + interpolation
               + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname)
 
@@ -191,9 +191,6 @@ if session["Number"] == "771" and sync_method == "Downsample LFPs":
 # <ul>
 # <li> Convert labeled dataset to a dataframe.
 # <li> Clean both, the labeled dataset and dataframe from NaN values at the boundaries.
-# <li> Print some NaN counts in different dataset stages.
-# <li> Plot LFP and angles data already clean.
-# <li> Plot a Box Plot of the 99 Channels plus the angles
 # </ul>
 Env.step("Clean the labeled dataset from NaN values at the boundaries.")
 
@@ -202,9 +199,12 @@ dataframe = data.ndarray_to_dataframe(labeled_data, rate_used)
 clean_frame = data.clean_unsync_boundaries(dataframe)
 clean_dataset = data.clean_unsync_boundaries(labeled_data, False)
 
-Env.print_text("Number of NaNs in Angles Data without interpolation: " + str(np.count_nonzero(np.isnan(angles_data))))
-Env.print_text("Number of NaNs in Labeled Dataset with interpolated Angles Data: "
-               + str(np.count_nonzero(np.isnan(labeled_data))))
+## <li> Step 7
+# <ul>
+# <li> Count number of NaNs at the beginning and at the end of the data.
+# <li> Print some NaN counts in different dataset stages.
+# </ul>
+Env.step("Count and print number of NaNs in the Dataset.")
 
 nans_begin = 0
 nans_end = 0
@@ -213,71 +213,91 @@ for i in range(length):
     if ~np.isnan(labeled_data[i, -1]):
         nans_begin = i
         break
-Env.print_text("Number of NaNs at the beginning of the interpolated Angles Data: " + str(nans_begin))
-
 for i in range(length-1, 0, -1):
     if ~np.isnan(labeled_data[i, -1]):
         nans_end = i
         break
-
 nans_end = length - (nans_end + 1)
-Env.print_text("Number of NaNs at the end of the interpolated Angles Data: " + str(nans_end))
 
+Env.print_text("Number of NaNs in Angles Data without interpolation: " + str(np.count_nonzero(np.isnan(angles_data))))
+Env.print_text("Number of NaNs in Labeled Dataset with interpolated Angles Data: "
+               + str(np.count_nonzero(np.isnan(labeled_data))))
+Env.print_text("Number of NaNs at the beginning of the interpolated Angles Data: " + str(nans_begin))
+Env.print_text("Number of NaNs at the end of the interpolated Angles Data: " + str(nans_end))
 Env.print_text("Number of NaNs in Labeled and Clean Dataset with interpolated Angles Data: "
                + str(np.count_nonzero(np.isnan(clean_dataset))))
 Env.print_text("Number of NaNs in Labeled and Clean DataFRAME with interpolated Angles Data: "
                + str(np.count_nonzero(np.isnan(clean_frame))))
 
 if PLOT:
-    Env.print_text("Plotting clean LFP data from channels 0 and interpolated angles data at "
-                   + str(rate_used) + "Hz. [°]")
+    ## <li> Step 8
+    # <ul>
+    # <li> Plotting clean LFP data from channels 0 and interpolated angles data.
+    # </ul>
+    Env.step("Plotting clean LFP data from channels 0 and interpolated angles data at " + str(rate_used) + "Hz. [°]")
+
     figname = session["Number"] + "_LFP_C0_clean_and_angles_" + interpolation + "_" + str(rate_used) + "Hz"
-    plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
+    plt.figure(figname)
     plt.subplot(211)
-    plt.plot(labeled_data[:-1, 0], "xr", markersize=1)
+    plt.plot(labeled_data[:-1, 0], "xr")
     plt.title("Señal LFP del Canal 0 limpia. Muestreada a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
     plt.subplot(212)
-    plt.plot(labeled_data[:, -1], "xb", markersize=1)
-    plt.title("Información de ángulos [°] limpia. Sesión: " + session["Number"] + ". Interpolada con: "
+    plt.plot(labeled_data[:, -1], "xb")
+    plt.title("Información de ángulos [°] limpia. Sesión: " + session["Number"] + ".\n Interpolada con: "
               + interpolation + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname)
 
+    ## <li> Step 9
+    # <ul>
+    # <li> Plotting Boxplot of all channels in two figures, from 0-49 and from 50-98.
+    # </ul>
+    Env.step("Plotting Boxplot of all channels in two figures, from 0-49 and from 50-98.")
 
-figname = session["Number"] + "_BoxPLot1-50_" + interpolation + "_" + str(rate_used) + "Hz"
-plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
-sns.boxplot(data=clean_frame.iloc[:, 0:50])
-plt.xlabel("Canales")
-plt.ylabel("Voltaje")
-plt.title("Diagrama de caja de los canales 1-50.\nSesión: " + session["Number"] + ". Interpolada con: "
-          + interpolation + " a " + str(rate_used) + "Hz")
-ui.store_figure(figname)
+    figname = session["Number"] + "_BoxPLot0-49_" + interpolation + "_" + str(rate_used) + "Hz"
+    plt.figure(figname, figsize=[12, 16])
+    sns.boxplot(data=clean_frame.iloc[:, 0:50], orient="h")
+    plt.ylabel("Canales")
+    plt.xlabel("Voltaje")
+    plt.title("Diagrama de caja de los canales 0-49.\nSesión: " + session["Number"] + ". Interpolada con: "
+              + interpolation + " a " + str(rate_used) + "Hz")
+    ui.store_figure(figname)
 
-figname = session["Number"] + "_BoxPLot51-99_" + interpolation + "_" + str(rate_used) + "Hz"
-plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
-sns.boxplot(data=clean_frame.iloc[:, 50:99])
-plt.xlabel("Canales")
-plt.ylabel("Voltaje")
-plt.title("Diagrama de caja de los canales 51-99.\nSesión: " + session["Number"] + ". Interpolada con: "
-          + interpolation + " a " + str(rate_used) + "Hz")
-ui.store_figure(figname)
+    figname = session["Number"] + "_BoxPLot50-98_" + interpolation + "_" + str(rate_used) + "Hz"
+    plt.figure(figname, figsize=[12, 16])
+    sns.boxplot(data=clean_frame.iloc[:, 50:99], orient="h")
+    plt.ylabel("Canales")
+    plt.xlabel("Voltaje")
+    plt.title("Diagrama de caja de los canales 50-98.\nSesión: " + session["Number"] + ". Interpolada con: "
+              + interpolation + " a " + str(rate_used) + "Hz")
+    ui.store_figure(figname)
 
-figname = session["Number"] + "_BoxPLotAngles_" + interpolation + "_" + str(rate_used) + "Hz"
-plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
-sns.boxplot(y=clean_frame["Angle"])
-plt.xlabel("Muestras")
-plt.ylabel("Ángulos")
-plt.title("Diagrama de caja de los ángulos.\nSesión: " + session["Number"] + ". Interpolada con: "
-          + interpolation + " a " + str(rate_used) + "Hz")
-ui.store_figure(figname)
+    figname = session["Number"] + "_BoxPLotChannels_" + interpolation + "_" + str(rate_used) + "Hz"
+    fig = plt.figure(figname)
 
-figname = session["Number"] + "_BoxPLotC0vsAngles_" + interpolation + "_" + str(rate_used) + "Hz"
-plt.figure(figname, figsize=ui.FIG_SIZE, dpi=ui.DPI)
-sns.boxplot(x=clean_frame["1"], y=clean_frame["Angle"])
-plt.xlabel("Muestras")
-plt.ylabel("Ángulos")
-plt.title("Diagrama de caja del canal 0 contra los ángulos.\nSesión: " + session["Number"] + ". Interpolada con: "
-          + interpolation + " a " + str(rate_used) + "Hz")
-ui.store_figure(figname, True)
+    ## <li> Step 10
+    # <ul>
+    # <li> Plotting Boxplot of interpolated angles.
+    # <li> Plotting Boxplot of interpolated angles vs channel 0 (None relevant data can be inferred from it).
+    # </ul>
+    Env.step("Plotting Boxplot of interpolated angles.")
+
+    figname = session["Number"] + "_BoxPLotAngles_" + interpolation + "_" + str(rate_used) + "Hz"
+    plt.figure(figname)
+    sns.boxplot(x=clean_frame["Angle"])
+    plt.ylabel("Muestras")
+    plt.xlabel("Ángulos")
+    plt.title("Diagrama de caja de los ángulos.\nSesión: " + session["Number"] + ". Interpolada con: "
+              + interpolation + " a " + str(rate_used) + "Hz")
+    ui.store_figure(figname)
+
+    """
+    figname = session["Number"] + "_BoxPLotC0vsAngles_" + interpolation + "_" + str(rate_used) + "Hz"
+    plt.figure(figname)
+    sns.boxplot(x=clean_frame["1"], y=clean_frame["Angle"])
+    plt.title("Diagrama de caja del canal 0 contra los ángulos.\nSesión: " + session["Number"] + ". Interpolada con: "
+              + interpolation + " a " + str(rate_used) + "Hz")
+    ui.store_figure(figname, True)
+    """
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>
