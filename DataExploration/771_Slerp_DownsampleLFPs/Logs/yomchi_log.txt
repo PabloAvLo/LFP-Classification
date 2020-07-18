@@ -10,17 +10,17 @@
                                        *** START OF TEST ***  
 # File      : DataExploration.py
 # Date      : 07-17-2020
-# Start Time: 18:33:15
+# Start Time: 18:36:18
 
 
 |------------------------------------------------------------------------------------------------------|
 |                                          *** Parameters ***                                          |
 |                                                                                                      |
 | Recording Session Number    : 771                                                                    |
-| Interpolation Method        : Linear                                                                 |
-| Synchronization Method      : Pad Angles                                                             |
+| Interpolation Method        : Slerp                                                                  |
+| Synchronization Method      : Downsample LFPs                                                        |
 | Number of Recorded Channels : 99                                                                     |
-| Sampling Rate to Use        : 1250Hz                                                                 |
+| Sampling Rate to Use        : 39.06Hz                                                                |
 |------------------------------------------------------------------------------------------------------|
 
 
@@ -41,24 +41,30 @@ Plotting Angles data [°] at 39.06Hz
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 3                                                 |
-| Pad Angles data to reach a higher sampling rate                                                      |
+| Downsample LFP data to match Angles sampling rate.                                                   |
 |------------------------------------------------------------------------------------------------------|
-Padding angles data with 'NaN' values to match the new sampling rate: 1250Hz. Original was: 39.06Hz.
-Plotting Angles data padded with 'NaN' [°]
+Downsampling LFP data by dropping 'extra' samples to match the new sampling rate: 39.06Hz. Original was: 1250Hz.
+Plotting LFP downsampled data to 39.06Hz from channels 0 and 97.
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 4                                                 |
-| Interpolate angles data using a linear approach.                                                     |
+| Interpolate angles data using a SLERP approach.                                                      |
 |------------------------------------------------------------------------------------------------------|
-Interpolate angles data using linear method.
-Plotting Angles data after linear interpolation [°]
+Interpolate angles data using SLERP method.
+Plotting Angles data after SLERP interpolation [°]
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 5                                                 |
 | Label data by concatenating LFPs and interpolated Angles in a single 2D-array.                       |
 |------------------------------------------------------------------------------------------------------|
-Adding labels to the data by concatenating the [3433472 x 99] LFP data matrix with the [3433472] Angles vector.
-Plotting LFP data from channels 0 and interpolated angles data at 1250Hz. [°]
+Adding labels to the data by concatenating the [107297 x 99] LFP data matrix with the [107297] Angles vector.
+Plotting LFP data from channels 0 and interpolated angles data at 39.06Hz. [°]
+
+Angles Data from: 15560 to 15600 where at 15566 the first LED is lost and at 15583 both are lost
+315.0 315.0 315.0 315.0 315.0 315.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0 45.0
+
+Angles Data Interpolated from: 15560 to 15600 where at 15566 the first LED is lost and at 15583 both are lost.
+315 315 315 315 315 315 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 6                                                 |
@@ -69,7 +75,7 @@ Plotting LFP data from channels 0 and interpolated angles data at 1250Hz. [°]
 |                                               Step 7                                                 |
 | Count and print number of NaNs in the Dataset.                                                       |
 |------------------------------------------------------------------------------------------------------|
-Number of NaNs in Angles Data without interpolation: 3351720
+Number of NaNs in Angles Data without interpolation: 1386
 Number of NaNs in Labeled Dataset with interpolated Angles Data: 0
 Number of NaNs at the beginning of the interpolated Angles Data: 0
 Number of NaNs at the end of the interpolated Angles Data: 0
@@ -78,7 +84,7 @@ Number of NaNs in Labeled and Clean DataFRAME with interpolated Angles Data: 0
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 8                                                 |
-| Plotting clean LFP data from channels 0 and interpolated angles data at 1250Hz. [°]                  |
+| Plotting clean LFP data from channels 0 and interpolated angles data at 39.06Hz. [°]                 |
 |------------------------------------------------------------------------------------------------------|
 
 |------------------------------------------------------------------------------------------------------|
@@ -93,6 +99,6 @@ Number of NaNs in Labeled and Clean DataFRAME with interpolated Angles Data: 0
 
 #######################################################################################################
                                        *** END OF TEST ***  
-# Test Duration : 00:1:38
-# Finish Time   : 18:34:53
+# Test Duration : 00:0:16
+# Finish Time   : 18:36:34
 #######################################################################################################

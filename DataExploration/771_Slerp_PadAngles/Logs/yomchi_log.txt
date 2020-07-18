@@ -10,14 +10,14 @@
                                        *** START OF TEST ***  
 # File      : DataExploration.py
 # Date      : 07-17-2020
-# Start Time: 18:33:15
+# Start Time: 18:30:45
 
 
 |------------------------------------------------------------------------------------------------------|
 |                                          *** Parameters ***                                          |
 |                                                                                                      |
 | Recording Session Number    : 771                                                                    |
-| Interpolation Method        : Linear                                                                 |
+| Interpolation Method        : Slerp                                                                  |
 | Synchronization Method      : Pad Angles                                                             |
 | Number of Recorded Channels : 99                                                                     |
 | Sampling Rate to Use        : 1250Hz                                                                 |
@@ -48,10 +48,10 @@ Plotting Angles data padded with 'NaN' [°]
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 4                                                 |
-| Interpolate angles data using a linear approach.                                                     |
+| Interpolate angles data using a SLERP approach.                                                      |
 |------------------------------------------------------------------------------------------------------|
-Interpolate angles data using linear method.
-Plotting Angles data after linear interpolation [°]
+Interpolate angles data using SLERP method.
+Plotting Angles data after SLERP interpolation [°]
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 5                                                 |
@@ -69,7 +69,7 @@ Plotting LFP data from channels 0 and interpolated angles data at 1250Hz. [°]
 |                                               Step 7                                                 |
 | Count and print number of NaNs in the Dataset.                                                       |
 |------------------------------------------------------------------------------------------------------|
-Number of NaNs in Angles Data without interpolation: 3351720
+Number of NaNs in Angles Data without interpolation: 44351
 Number of NaNs in Labeled Dataset with interpolated Angles Data: 0
 Number of NaNs at the beginning of the interpolated Angles Data: 0
 Number of NaNs at the end of the interpolated Angles Data: 0
@@ -93,6 +93,6 @@ Number of NaNs in Labeled and Clean DataFRAME with interpolated Angles Data: 0
 
 #######################################################################################################
                                        *** END OF TEST ***  
-# Test Duration : 00:1:38
-# Finish Time   : 18:34:53
+# Test Duration : 00:2:1
+# Finish Time   : 18:32:47
 #######################################################################################################

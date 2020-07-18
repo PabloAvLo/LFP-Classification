@@ -58,7 +58,7 @@ def load_angles_data(file=ANGLES_771, degrees=True):
     Loads the animal position data from a .whl file which contain 2 (x, y) pairs, one for each LED. If any position
     value equals '-1' then it's replaced with 'NaN' instead.
     @param file: Path to the file containing the animal LED's position information
-    @param degrees: If this flag is set, then the angles are returned in degrees, or radians otherwise.
+    @param degrees: If this flag is set, then the angles are returned in degrees from [0, 360[, or radians otherwise.
     @return angles: Array with the angles in radians extracted from the positions. The angles are given as
     float16 values calculated as arctan(y2 - y1 /x2 - x1). Unless the denominator is 0, in that case '0' is returned
     for that element.
@@ -75,6 +75,7 @@ def load_angles_data(file=ANGLES_771, degrees=True):
 
     if degrees:
         angles = np.degrees(angles)
+        angles += 180
 
     return angles
 
@@ -101,20 +102,73 @@ def pad_angles(angles_data, orig_rate, new_rate):
 
     return resampled_data
 
+def slerp(start, end, amount):
+    """
+    Spherical Linear Interpolation: This is equivalent to the linear interpolation, applied in a sphere.
+    It considers the 'start' and 'end' as angles in a circumference where the objective is to find the smallest arch.
+    param start: Start angle with values from 0 to 359
+    param end: Final angle with values from 0 to 359
+    param amount: Value between [0, 1] which determines how close the interpolated angle will be placed from the Start
+    angle (0) or from the Final angle (1), being 0.5 the middle.
+    return interpolated_angle: Interpolated angle between 'start' and 'end'.
+    """
+    shortest_angle = ((end-start) + 180) % 360 - 180
+    interpolated_angle = (start + shortest_angle * amount) % 360
+    return interpolated_angle
+
+def vectorized_slerp(angles_data):
+    """
+    Replace 'NaN' values between valid values (interpolation) in angular data with an interpolated value using
+    Spherical Linear Interpolation (SLERP).
+    param angles_data: Array with the angles data extracted from the animal positions.
+    return interpolated_angles: Array with the angles data interpolated using SLERP
+    """
+    start_angle = np.nan
+    no_nans = 0
+    first_nan_index = 0
+    interpolated_angles = angles_data
+
+    for i in range(1, len(interpolated_angles)):
+        val = interpolated_angles[i]
+
+        # If a NaN followed by another NaN
+        if np.isnan(interpolated_angles[i]) and not np.isnan(interpolated_angles[i-1]):
+            start_angle = interpolated_angles[i-1]
+            no_nans = 1
+            first_nan_index = i
+        # If a valid value followed by NaN
+        elif np.isnan(interpolated_angles[i]) and np.isnan(interpolated_angles[i - 1]):
+            no_nans += 1
+        # If angles[i] != NaN and angles[i-1] == NaN
+        elif not np.isnan(interpolated_angles[i]) and np.isnan(interpolated_angles[i - 1]):
+            if no_nans > 0 and not np.isnan(start_angle):
+                amount = 0
+                end_angle = interpolated_angles[i]
+                for j in range(first_nan_index, first_nan_index + no_nans):
+                    amount += 1/(no_nans + 1)
+                    interpolated_angles[j] = (start_angle + ((end_angle-start_angle) + 180) % 360 - 180 * amount) % 360
+                start_angle = np.nan
+
+    return interpolated_angles
+
 
 def interpolate_angles(angles_data, method="linear"):
     """
     Replace 'NaN' values in angular data with an interpolated value using a given method.
-    @param angles_data: Array with the angles data extracted from the animal positions and Padded with
+    @param angles_data: Array with the angles data extracted from the animal positions.
     @param method: Interpolation method to fill the gaps in the data. The optional methods available are the supported
     by pandas.DataFrame.interpolate function, which are: 'linear', 'quadratic', 'cubic', 'polynomial', among others.
-    @return interpolated_angles: Original data filled with zeros to match the new sampling rate.
+    @return interpolated_angles: Array with the angles data interpolated using the given method.
     """
     Env.print_text("Interpolate angles data using " + method + " method.")
 
-    angles_series = pd.Series(angles_data)
-    interpolated_angles = angles_series.interpolate(method)
-    interpolated_angles = interpolated_angles.to_numpy()
+    if method == "SLERP":
+        interpolated_angles = vectorized_slerp(angles_data)
+
+    else:
+        angles_series = pd.Series(angles_data)
+        interpolated_angles = angles_series.interpolate(method)
+        interpolated_angles = interpolated_angles.to_numpy()
 
     return interpolated_angles
 
@@ -138,16 +192,33 @@ def downsample_lfps(lfp_data, orig_rate, new_rate):
 
     return resampled_data
 
-def add_labels(lfps, angles):
+def add_labels(lfps, angles, start, offset):
     """
     Add an additional column to the LFP signals matrix with the angular data used as the labels.
     @param lfps: Matrix [n x numChannels] with the LFP signals used as the preliminary features of the data.
     @param angles: Array with the angles data extracted from the positions used as the labels of the data.
+    @param start: Angle in [0°, 360°[ used as first label.
+    @param offset: Offset in [1°, 360°[ between labels starting from 'start' angle.
     @return labeled_data: Matrix with the labeled data [n x lfps[numChannels], angles].
     """
     Env.print_text("Adding labels to the data by concatenating the [" + str(len(lfps)) + " x " + str(len(lfps[0])) +
                    "] LFP data matrix with the [" + str(len(angles)) + "] Angles vector.")
 
+    if (0 <= start < 360) and (1 <= offset < 360):
+        labels = np.arange(start, 360, offset)
+
+    for i in range(0, len(angles)):
+        if not np.isnan(angles[i]):
+            minval = np.inf
+            label = start
+            for tag in labels:
+                diff = abs(angles[i] - tag)
+                if diff < minval:
+                    minval = diff
+                    label = tag
+            angles[i] = label
+
+    angles = angles.astype(int)
     labeled_data = np.concatenate((lfps, angles), axis=1)
 
     return labeled_data

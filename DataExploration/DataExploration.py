@@ -40,7 +40,7 @@ DONT_PLOT = False
 session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES_771}  # or
 #session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
 
-interpolation = "linear"  # "linear" "quadratic" "cubic" "nearest"
+interpolation = "SLERP"  # "linear" "quadratic" "cubic" "nearest" "SLERP"
 sync_method = "Downsample LFPs"  # "Pad Angles" "Downsample LFPs"
 
 # Data Properties
@@ -86,6 +86,8 @@ if PLOT:
 Env.step("Importing angles data from session: " + session["Number"])
 
 angles_data = data.load_angles_data(session["Angles Data"])
+
+Env.print_text("Min angle: " + str(np.nanmin(angles_data)) + ", Max angle: " + str(np.nanmax(angles_data)))
 
 if PLOT:
     Env.print_text("Plotting Angles data [°] at " + str(data.POSITION_DATA_SAMPLING_RATE) + "Hz")
@@ -153,7 +155,7 @@ if PLOT:
     plt.plot(angles_data_interpolated[:], "xr")
     plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + ".\n Interpolada con: " + interpolation
               + " a " + str(rate_used) + "Hz")
-    ui.store_figure(figname)
+    ui.store_figure(figname, True)
 
 ## <li> Step 5
 # <ul>
@@ -163,7 +165,7 @@ if PLOT:
 # </ul>
 Env.step("Label data by concatenating LFPs and interpolated Angles in a single 2D-array.")
 
-labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1))
+labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1), 45, 90)
 
 if PLOT:
     Env.print_text("Plotting LFP data from channels 0 and interpolated angles data at " + str(rate_used) + "Hz. [°]")
@@ -301,5 +303,5 @@ if PLOT:
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>
-Env.finish_test()
-#Env.finish_test(session["Number"] + "_" + interpolation.title() + "_" + sync_method.replace(" ", ""))
+#Env.finish_test()
+Env.finish_test(session["Number"] + "_" + interpolation.title() + "_" + sync_method.replace(" ", ""))
