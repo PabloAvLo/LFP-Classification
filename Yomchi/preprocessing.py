@@ -146,7 +146,7 @@ def vectorized_slerp(angles_data):
                 end_angle = interpolated_angles[i]
                 for j in range(first_nan_index, first_nan_index + no_nans):
                     amount += 1/(no_nans + 1)
-                    interpolated_angles[j] = (start_angle + ((end_angle-start_angle) + 180) % 360 - 180 * amount) % 360
+                    interpolated_angles[j] = (start_angle + (((end_angle-start_angle) + 180) % 360 - 180) * amount) % 360
                 start_angle = np.nan
 
     return interpolated_angles

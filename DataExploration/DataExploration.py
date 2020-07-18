@@ -41,7 +41,7 @@ session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES
 #session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
 
 interpolation = "SLERP"  # "linear" "quadratic" "cubic" "nearest" "SLERP"
-sync_method = "Downsample LFPs"  # "Pad Angles" "Downsample LFPs"
+sync_method = "Pad Angles"  # "Pad Angles" "Downsample LFPs"
 
 # Data Properties
 num_channels = data.EC014_41_NUMBER_OF_CHANNELS
