@@ -129,24 +129,24 @@ def vectorized_slerp(angles_data):
     interpolated_angles = angles_data
 
     for i in range(1, len(interpolated_angles)):
-        val = interpolated_angles[i]
-
-        # If a NaN followed by another NaN
+        # If a valid value followed by NaN: this is the first NaN, start counting
         if np.isnan(interpolated_angles[i]) and not np.isnan(interpolated_angles[i-1]):
             start_angle = interpolated_angles[i-1]
             no_nans = 1
             first_nan_index = i
-        # If a valid value followed by NaN
+
+        # If a NaN followed by another NaN: Increment counter 1+.
         elif np.isnan(interpolated_angles[i]) and np.isnan(interpolated_angles[i - 1]):
             no_nans += 1
-        # If angles[i] != NaN and angles[i-1] == NaN
+
+        # If a NaN followed by a valid value: This is the last NaN, interpolate.
         elif not np.isnan(interpolated_angles[i]) and np.isnan(interpolated_angles[i - 1]):
             if no_nans > 0 and not np.isnan(start_angle):
                 amount = 0
                 end_angle = interpolated_angles[i]
                 for j in range(first_nan_index, first_nan_index + no_nans):
                     amount += 1/(no_nans + 1)
-                    interpolated_angles[j] = (start_angle + (((end_angle-start_angle) + 180) % 360 - 180) * amount) % 360
+                    interpolated_angles[j] = slerp(start_angle, end_angle, amount)
                 start_angle = np.nan
 
     return interpolated_angles
@@ -218,7 +218,6 @@ def add_labels(lfps, angles, start, offset):
                     label = tag
             angles[i] = label
 
-    angles = angles.astype(int)
     labeled_data = np.concatenate((lfps, angles), axis=1)
 
     return labeled_data

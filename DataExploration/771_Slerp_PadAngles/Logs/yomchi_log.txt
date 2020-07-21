@@ -9,8 +9,8 @@
 #######################################################################################################
                                        *** START OF TEST ***  
 # File      : DataExploration.py
-# Date      : 07-17-2020
-# Start Time: 18:50:39
+# Date      : 07-20-2020
+# Start Time: 21:33:58
 
 
 |------------------------------------------------------------------------------------------------------|
@@ -64,15 +64,16 @@ Plotting LFP data from channels 0 and interpolated angles data at 1250Hz. [°]
 |                                               Step 6                                                 |
 | Clean the labeled dataset from NaN values at the boundaries.                                         |
 |------------------------------------------------------------------------------------------------------|
+Plotting Barplot of Labels after SLERP interpolation
 
 |------------------------------------------------------------------------------------------------------|
 |                                               Step 7                                                 |
 | Count and print number of NaNs in the Dataset.                                                       |
 |------------------------------------------------------------------------------------------------------|
 Number of NaNs in Angles Data without interpolation: 44351
-Number of NaNs in Labeled Dataset with interpolated Angles Data: 0
-Number of NaNs at the beginning of the interpolated Angles Data: 0
-Number of NaNs at the end of the interpolated Angles Data: 0
+Number of NaNs in Labeled Dataset with interpolated Angles Data: 44351
+Number of NaNs at the beginning of the interpolated Angles Data: 29824
+Number of NaNs at the end of the interpolated Angles Data: 14527
 Number of NaNs in Labeled and Clean Dataset with interpolated Angles Data: 0
 Number of NaNs in Labeled and Clean DataFRAME with interpolated Angles Data: 0
 
@@ -86,13 +87,8 @@ Number of NaNs in Labeled and Clean DataFRAME with interpolated Angles Data: 0
 | Plotting Boxplot of all channels in two figures, from 0-49 and from 50-98.                           |
 |------------------------------------------------------------------------------------------------------|
 
-|------------------------------------------------------------------------------------------------------|
-|                                               Step 10                                                |
-| Plotting Boxplot of interpolated angles.                                                             |
-|------------------------------------------------------------------------------------------------------|
-
 #######################################################################################################
                                        *** END OF TEST ***  
-# Test Duration : 00:2:34
-# Finish Time   : 18:53:14
+# Test Duration : 00:3:30
+# Finish Time   : 21:37:29
 #######################################################################################################

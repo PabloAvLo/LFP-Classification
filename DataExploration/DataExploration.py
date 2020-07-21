@@ -37,8 +37,8 @@ PLOT = True
 DONT_PLOT = False
 
 # Session and methods Parameters
-session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES_771}  # or
-#session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
+#session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES_771}  # or
+session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
 
 interpolation = "SLERP"  # "linear" "quadratic" "cubic" "nearest" "SLERP"
 sync_method = "Pad Angles"  # "Pad Angles" "Downsample LFPs"
@@ -155,7 +155,7 @@ if PLOT:
     plt.plot(angles_data_interpolated[:], "xr")
     plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + ".\n Interpolada con: " + interpolation
               + " a " + str(rate_used) + "Hz")
-    ui.store_figure(figname, True)
+    ui.store_figure(figname)
 
 ## <li> Step 5
 # <ul>
@@ -165,7 +165,10 @@ if PLOT:
 # </ul>
 Env.step("Label data by concatenating LFPs and interpolated Angles in a single 2D-array.")
 
-labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1), 45, 90)
+base_angle = 0
+offset_between_angles = 30
+labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1),
+                               base_angle, offset_between_angles)
 
 if PLOT:
     Env.print_text("Plotting LFP data from channels 0 and interpolated angles data at " + str(rate_used) + "Hz. [°]")
@@ -193,6 +196,7 @@ if session["Number"] == "771" and sync_method == "Downsample LFPs":
 # <ul>
 # <li> Convert labeled dataset to a dataframe.
 # <li> Clean both, the labeled dataset and dataframe from NaN values at the boundaries.
+# <li> Print Bar plot for labeled angles.
 # </ul>
 Env.step("Clean the labeled dataset from NaN values at the boundaries.")
 
@@ -200,6 +204,23 @@ dataframe = data.ndarray_to_dataframe(labeled_data, rate_used)
 
 clean_frame = data.clean_unsync_boundaries(dataframe)
 clean_dataset = data.clean_unsync_boundaries(labeled_data, False)
+
+labels = np.arange(base_angle, 360, offset_between_angles)
+percentages = []
+for u in range(base_angle, 360, offset_between_angles):
+    percentages.append(round(np.sum(clean_dataset[:, -1] == u)*100/len(clean_dataset[:, -1])))
+
+labels_percent = np.concatenate((np.expand_dims(labels, axis=1), np.expand_dims(percentages, axis=1)), axis=1)
+dataframe_labels = pd.DataFrame(data=labels_percent, columns=["Angulos", "Porcentaje"])
+
+if PLOT:
+    Env.print_text("Plotting Barplot of Labels after " + interpolation + " interpolation")
+    figname = session["Number"] + "_BarPLotAngles_" + interpolation + "_" + str(rate_used) + "Hz"
+    plt.figure(figname)
+    sns.barplot(x="Angulos", y="Porcentaje", data=dataframe_labels)
+    plt.title("Gráfico de Barras de las etiquetas. Sesión: " + session["Number"] + ".\n Interpolada con: " + interpolation
+              + " a " + str(rate_used) + "Hz")
+    ui.store_figure(figname)
 
 ## <li> Step 7
 # <ul>
@@ -210,20 +231,20 @@ Env.step("Count and print number of NaNs in the Dataset.")
 
 nans_begin = 0
 nans_end = 0
-length = len(labeled_data)
+length = len(angles_data_interpolated)
 for i in range(length):
-    if ~np.isnan(labeled_data[i, -1]):
+    if ~np.isnan(angles_data_interpolated[i]):
         nans_begin = i
         break
 for i in range(length-1, 0, -1):
-    if ~np.isnan(labeled_data[i, -1]):
+    if ~np.isnan(angles_data_interpolated[i]):
         nans_end = i
         break
 nans_end = length - (nans_end + 1)
 
 Env.print_text("Number of NaNs in Angles Data without interpolation: " + str(np.count_nonzero(np.isnan(angles_data))))
 Env.print_text("Number of NaNs in Labeled Dataset with interpolated Angles Data: "
-               + str(np.count_nonzero(np.isnan(labeled_data))))
+               + str(np.count_nonzero(np.isnan(angles_data_interpolated))))
 Env.print_text("Number of NaNs at the beginning of the interpolated Angles Data: " + str(nans_begin))
 Env.print_text("Number of NaNs at the end of the interpolated Angles Data: " + str(nans_end))
 Env.print_text("Number of NaNs in Labeled and Clean Dataset with interpolated Angles Data: "
@@ -276,10 +297,11 @@ if PLOT:
     figname = session["Number"] + "_BoxPLotChannels_" + interpolation + "_" + str(rate_used) + "Hz"
     fig = plt.figure(figname)
 
+if DONT_PLOT:
     ## <li> Step 10
     # <ul>
     # <li> Plotting Boxplot of interpolated angles.
-    # <li> Plotting Boxplot of interpolated angles vs channel 0 (None relevant data can be inferred from it).
+    # <li> Plotting Boxplot of interpolated angles vs channel 0
     # </ul>
     Env.step("Plotting Boxplot of interpolated angles.")
 
@@ -292,14 +314,13 @@ if PLOT:
               + interpolation + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname)
 
-    """
     figname = session["Number"] + "_BoxPLotC0vsAngles_" + interpolation + "_" + str(rate_used) + "Hz"
     plt.figure(figname)
     sns.boxplot(x=clean_frame["1"], y=clean_frame["Angle"])
     plt.title("Diagrama de caja del canal 0 contra los ángulos.\nSesión: " + session["Number"] + ". Interpolada con: "
               + interpolation + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname, True)
-    """
+
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>
