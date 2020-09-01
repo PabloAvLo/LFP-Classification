@@ -80,7 +80,7 @@ def load_angles_data(file=ANGLES_771, degrees=True):
     return angles
 
 
-def pad_angles(angles_data, orig_rate, new_rate):
+def angles_expansion(angles_data, orig_rate, new_rate):
     """
     Fill angular data with 'NaN' values to match an expected sampling rate. Usually the position data is acquired at a
     lower sampling rate than the LFP signals.
@@ -89,18 +89,19 @@ def pad_angles(angles_data, orig_rate, new_rate):
     @param angles_data: Array with the angles data extracted from the animal positions.
     @param orig_rate: Sampling rate originally used to acquire the data.
     @param new_rate: New sampling rate of the data. The gaps are filled with 'NaN'.
-    @return resampled_data: Original data filled with zeros to match the new sampling rate.
+    @return upsampled_data: Original data filled with zeros to match the new sampling rate.
     """
-    Env.print_text("Padding angles data with 'NaN' values to match the new sampling rate: " + str(new_rate) + "Hz. "
+    Env.print_text("Expanding angles data with 'NaN' values to match the new sampling rate: " + str(new_rate) + "Hz. "
                    + "Original was: " + str(orig_rate) + "Hz.")
 
-    rate_reason = round(new_rate/orig_rate)
-    padding = np.full((len(angles_data), rate_reason - 1), np.NaN)
-    resampled_data = np.concatenate((np.transpose(np.array([angles_data])), padding), axis=1)
-    resampled_data = resampled_data[:-1, :]
-    resampled_data = resampled_data.flatten()
+    expansion_factor = round(new_rate/orig_rate)
+    padding = np.full((len(angles_data), expansion_factor - 1), np.NaN)
+    upsampled_data = np.concatenate((np.transpose(np.array([angles_data])), padding), axis=1)
+    upsampled_data = upsampled_data[:-1, :]
+    upsampled_data = upsampled_data.flatten()
 
-    return resampled_data
+    return upsampled_data
+
 
 def slerp(start, end, amount):
     """
@@ -115,6 +116,7 @@ def slerp(start, end, amount):
     shortest_angle = ((end-start) + 180) % 360 - 180
     interpolated_angle = (start + shortest_angle * amount) % 360
     return interpolated_angle
+
 
 def vectorized_slerp(angles_data):
     """
@@ -192,11 +194,13 @@ def downsample_lfps(lfp_data, orig_rate, new_rate):
 
     return resampled_data
 
-def add_labels(lfps, angles, start, offset):
+
+def add_labels(lfps, angles, round_labels, start=0, offset=30):
     """
     Add an additional column to the LFP signals matrix with the angular data used as the labels.
     @param lfps: Matrix [n x numChannels] with the LFP signals used as the preliminary features of the data.
     @param angles: Array with the angles data extracted from the positions used as the labels of the data.
+    @param round_labels: Boolean, if true the labels are rounded to angles multiples of 'offset' starting from 'start'
     @param start: Angle in [0°, 360°[ used as first label.
     @param offset: Offset in [1°, 360°[ between labels starting from 'start' angle.
     @return labeled_data: Matrix with the labeled data [n x lfps[numChannels], angles].
@@ -204,19 +208,20 @@ def add_labels(lfps, angles, start, offset):
     Env.print_text("Adding labels to the data by concatenating the [" + str(len(lfps)) + " x " + str(len(lfps[0])) +
                    "] LFP data matrix with the [" + str(len(angles)) + "] Angles vector.")
 
-    if (0 <= start < 360) and (1 <= offset < 360):
-        labels = np.arange(start, 360, offset)
+    if round_labels:
+        if (0 <= start < 360) and (1 <= offset < 360):
+            labels = np.arange(start, 360, offset)
 
-    for i in range(0, len(angles)):
-        if not np.isnan(angles[i]):
-            minval = np.inf
-            label = start
-            for tag in labels:
-                diff = abs(angles[i] - tag)
-                if diff < minval:
-                    minval = diff
-                    label = tag
-            angles[i] = label
+        for i in range(0, len(angles)):
+            if not np.isnan(angles[i]):
+                minval = np.inf
+                label = start
+                for tag in labels:
+                    diff = abs(angles[i] - tag)
+                    if diff < minval:
+                        minval = diff
+                        label = tag
+                angles[i] = label
 
     labeled_data = np.concatenate((lfps, angles), axis=1)
 
@@ -265,30 +270,46 @@ def ndarray_to_dataframe(dataset, rate):
     return dataframe
 
 
-def series_to_windows(series, window_size, batch_size, shuffle_buffer, expand_series=False):
-    """ TODO: Taken from the 'Sequences, Time Series and Prediction' course scripts. To be modified.
+def series_to_windows(series, channel, window_size, batch_size, shuffle_buffer):
+    """
     Receives a numpy array containing the time series of LFP signals of n channels and returns the same data, separated
     in windows.
     @param series: Numpy Array with the LFP data of the n channels.
+    @param channel: Channel to use.
     @param window_size: Size of the windows in which the data are being split.
-    @param batch_size:
-    @param shuffle_buffer:
-    @param expand_series: Adds a column at the end.
-    @return windowed_data: LFP data separated in windows.
+    @param batch_size: Number of pairs data-labels to group as a batch
+    @param shuffle_buffer: Number of windows to shuffle at the same time.
+    @return windowed_ds: LFP data of the selected channel separated in windows.
+    0123456789 10
+    12345678910 11
     """
 
-    if expand_series:
-        series = tf.expand_dims(series, axis=-1)
-    windowed_data = tf.data.Dataset.from_tensor_slices(series)
+    data = series[:, channel]
+    labels = series[window_size::, -1]
+
+    # Creates a dataset from the input
+    windowed_data = tf.data.Dataset.from_tensor_slices(data)
+    windowed_labels = tf.data.Dataset.from_tensor_slices(data)
+
+    # Split the data set in windows shifting each window by 1 and forcing them to the same size (window_size + 1)
     windowed_data = windowed_data.window(window_size + 1, shift=1, drop_remainder=True)
+
+    # Make each window a numpy array row.
     windowed_data = windowed_data.flat_map(lambda window: window.batch(window_size + 1))
-    windowed_data = windowed_data.shuffle(shuffle_buffer)
 
-    if expand_series:
-        windowed_data = windowed_data.map(lambda window: (window[:-1], window[1:]))
-    else:
-        windowed_data = windowed_data.map(lambda window: (window[:-1], window[-1]))
+#    """ FOR DEBUGGING
+    for window in windowed_data.take(5):
+        print(window.numpy())
+#    """
 
-    windowed_data = windowed_data.batch(batch_size).prefetch(1)
+    # Separates the labels from the data. TODO add angles as labels
+    windowed_ds = tf.data.Dataset.zip((windowed_data, windowed_labels))
+    # windowed_ds = windowed_data.map(lambda window: (window[:-1], window[-1]))
 
-    return windowed_data
+    # Shuffle the data in groups of shuffle_buffer to accelerate. Instead of shuffle it all at once.
+    windowed_ds = windowed_data.shuffle(shuffle_buffer)
+
+    # Batch the data into sets of 'batch_size'.
+    windowed_ds = windowed_data.batch(batch_size).prefetch(1)
+
+    return windowed_ds

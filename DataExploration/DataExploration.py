@@ -20,11 +20,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import pandas as pd
+import tensorflow as tf
+
 
 ## <h1> Data Exploration </h1>
 # <h2> Experiment Setup </h2>
 # <ul>
-# <li> Initialize Environment
+# <li> Initialize Environment.
+# <li> Initialize Tensorflow session.
+# <li> Set seed for Numpy and Tensorflow
 # <li> Specify run configuration parameters.
 # <li> Specify session and methods parameters.
 # <li> Specify data properties parameters.
@@ -32,21 +36,24 @@ import pandas as pd
 # <ol>
 Env.init_environment(True)
 
+tf.keras.backend.clear_session()
+tf.random.set_seed(51)
+np.random.seed(51)
+
 # Run configuration parameters
-PLOT = True
-DONT_PLOT = False
+PLOT = False
 
 # Session and methods Parameters
 #session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES_771}  # or
 session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
 
 interpolation = "SLERP"  # "linear" "quadratic" "cubic" "nearest" "SLERP"
-sync_method = "Pad Angles"  # "Pad Angles" "Downsample LFPs"
+sync_method = "Upsample Angles"  # "Upsample Angles" "Downsample LFPs"
 
 # Data Properties
 num_channels = data.EC014_41_NUMBER_OF_CHANNELS
 rate_used = data.POSITION_DATA_SAMPLING_RATE
-if sync_method == "Pad Angles":
+if sync_method == "Upsample Angles":
     rate_used = data.LFP_DATAMAX_SAMPLING_RATE
 
 Env.print_parameters({"Recording Session Number": session["Number"],
@@ -121,22 +128,22 @@ if sync_method == "Downsample LFPs":
         plt.title("Señal LFP del Canal 97 a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
         ui.store_figure(figname)
 
-elif sync_method == "Pad Angles":
+elif sync_method == "Upsample Angles":
     ## <li> Step 3
     # <ul>
     # <li> Fill angles gaps to match the LFP sampling rate.
     # <li> Plot angles data in the new sampling rate.
     # </ul>
-    Env.step("Pad Angles data to reach a higher sampling rate")
+    Env.step("Upsample Angles data to reach a higher sampling rate")
 
-    angles_data = data.pad_angles(angles_data, data.POSITION_DATA_SAMPLING_RATE, data.LFP_DATAMAX_SAMPLING_RATE)
+    angles_data = data.angles_expansion(angles_data, data.POSITION_DATA_SAMPLING_RATE, data.LFP_DATAMAX_SAMPLING_RATE)
 
     if PLOT:
-        Env.print_text("Plotting Angles data padded with 'NaN' [°]")
-        figname = session["Number"] + "_Angles_padded_degrees_" + str(rate_used) + "Hz"
+        Env.print_text("Plotting Angles data expanded with 'NaN' [°]")
+        figname = session["Number"] + "Expanded_Angles_degrees_" + str(rate_used) + "Hz"
         plt.figure(figname)
         plt.plot(angles_data[:], "xb")
-        plt.title("Información de ángulos [°] rellena a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
+        plt.title("Información de ángulos [°] expandida a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
         ui.store_figure(figname)
 
 ## <li> Step 4
@@ -167,9 +174,9 @@ Env.step("Label data by concatenating LFPs and interpolated Angles in a single 2
 
 base_angle = 0
 offset_between_angles = 30
-labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1),
-                               base_angle, offset_between_angles)
-
+labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1), False)
+#labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1),
+#                               base_angle, offset_between_angles)
 if PLOT:
     Env.print_text("Plotting LFP data from channels 0 and interpolated angles data at " + str(rate_used) + "Hz. [°]")
     figname = session["Number"] + "_LFP_C0_and_angles_" + interpolation + "_" + str(rate_used) + "Hz"
@@ -297,7 +304,7 @@ if PLOT:
     figname = session["Number"] + "_BoxPLotChannels_" + interpolation + "_" + str(rate_used) + "Hz"
     fig = plt.figure(figname)
 
-if DONT_PLOT:
+if PLOT:
     ## <li> Step 10
     # <ul>
     # <li> Plotting Boxplot of interpolated angles.
@@ -321,8 +328,15 @@ if DONT_PLOT:
               + interpolation + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname, True)
 
+## <li> Step 10
+    # <ul>
+    # <li> Convert data to windowed series.
+    # </ul>
+
+windowed_data = data.series_to_windows(clean_dataset, 16, 32, 32, 1000)
+print(list(windowed_data.take(1).as_numpy_iterator()))
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>
-#Env.finish_test()
-Env.finish_test(session["Number"] + "_" + interpolation.title() + "_" + sync_method.replace(" ", ""))
+Env.finish_test()
+#Env.finish_test(session["Number"] + "_" + interpolation.title() + "_" + sync_method.replace(" ", ""))
