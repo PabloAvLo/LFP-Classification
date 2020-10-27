@@ -34,7 +34,7 @@ import tensorflow as tf
 # <li> Specify data properties parameters.
 # </ul>
 # <ol>
-Env.init_environment(True)
+Env.init_environment(True, enable_debug=True)
 
 tf.keras.backend.clear_session()
 tf.random.set_seed(51)
@@ -332,9 +332,8 @@ if PLOT:
     # <ul>
     # <li> Convert data to windowed series.
     # </ul>
-
-windowed_data = data.series_to_windows(clean_dataset, 16, 32, 32, 1000)
-print(list(windowed_data.take(1).as_numpy_iterator()))
+Env.step("Convert data to windowed series.")
+windowed_data = data.channels_to_windows(clean_dataset, 0, 31, 31, 1000)
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>

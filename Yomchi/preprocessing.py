@@ -270,7 +270,7 @@ def ndarray_to_dataframe(dataset, rate):
     return dataframe
 
 
-def series_to_windows(series, channel, window_size, batch_size, shuffle_buffer):
+def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer):
     """
     Receives a numpy array containing the time series of LFP signals of n channels and returns the same data, separated
     in windows.
@@ -280,8 +280,6 @@ def series_to_windows(series, channel, window_size, batch_size, shuffle_buffer):
     @param batch_size: Number of pairs data-labels to group as a batch
     @param shuffle_buffer: Number of windows to shuffle at the same time.
     @return windowed_ds: LFP data of the selected channel separated in windows.
-    0123456789 10
-    12345678910 11
     """
 
     data = series[:, channel]
@@ -289,7 +287,6 @@ def series_to_windows(series, channel, window_size, batch_size, shuffle_buffer):
 
     # Creates a dataset from the input
     windowed_data = tf.data.Dataset.from_tensor_slices(data)
-    windowed_labels = tf.data.Dataset.from_tensor_slices(data)
 
     # Split the data set in windows shifting each window by 1 and forcing them to the same size (window_size + 1)
     windowed_data = windowed_data.window(window_size + 1, shift=1, drop_remainder=True)
@@ -297,19 +294,57 @@ def series_to_windows(series, channel, window_size, batch_size, shuffle_buffer):
     # Make each window a numpy array row.
     windowed_data = windowed_data.flat_map(lambda window: window.batch(window_size + 1))
 
-#    """ FOR DEBUGGING
-    for window in windowed_data.take(5):
-        print(window.numpy())
-#    """
+    print("Channel " + str(channel) + " Data:")
 
-    # Separates the labels from the data. TODO add angles as labels
-    windowed_ds = tf.data.Dataset.zip((windowed_data, windowed_labels))
-    # windowed_ds = windowed_data.map(lambda window: (window[:-1], window[-1]))
+    if Env.debug:
+        for window in windowed_data.take(5):
+            print(window.numpy())
+
+    # Get the average angle for each window.
+    labels = average_angles(labels, window_size)
+
+    # Add labels to the data
+    windowed_ds = tf.data.Dataset.zip((windowed_data, labels))
 
     # Shuffle the data in groups of shuffle_buffer to accelerate. Instead of shuffle it all at once.
-    windowed_ds = windowed_data.shuffle(shuffle_buffer)
+    windowed_ds = windowed_ds.shuffle(shuffle_buffer)
 
     # Batch the data into sets of 'batch_size'.
-    windowed_ds = windowed_data.batch(batch_size).prefetch(1)
+    windowed_ds = windowed_ds.batch(batch_size).prefetch(1)
+
+    if Env.debug:
+        for x, y in windowed_ds.take(5):
+            print("x = ", x.numpy())
+            print("y = ", y.numpy())
 
     return windowed_ds
+
+
+def average_angles(angles, window_size):
+    """
+    Receives a numpy array containing the time series of the angles and returns the an set of windows with the average
+    of the 'window_size' angles in each window. Each window is 1 element shifted from the previous window.
+    @param angles: Numpy Array with the Angles data to use as the labels.
+    @param window_size: Size of the windows in which the data are being split.
+    @return average_angles: Averaged Angles data separated in windows.
+    """
+
+    # Get an array of labels from the series
+    windowed_angles = tf.data.Dataset.from_tensor_slices(angles)
+
+    # Split the data set in windows shifting each window by 1 and forcing them to the same size (window_size + 1)
+    windowed_angles = windowed_angles.window(window_size + 1, shift=1, drop_remainder=True)
+
+    # Make each window a numpy array row.
+    windowed_angles = windowed_angles.flat_map(lambda window: window.batch(window_size + 1))
+    averaged_angles = windowed_angles.map(lambda window: tf.math.reduce_mean(window))
+
+    if Env.debug:
+        print("Angles:")
+        for window in windowed_angles.take(5):
+            print(window.numpy())
+        for window in averaged_angles.take(5):
+            print(window.numpy())
+
+    return averaged_angles
+

@@ -36,17 +36,21 @@ step_number = 1
 versions_log = None
 yomchi_log = None
 caller_file = None
+debug = False
 
 
-def init_environment(print_the_header=False):
+def init_environment(print_the_header=False, enable_debug=False):
     """
     Initialize the directories and files to log the results.
     @param print_the_header: If True, print the header
+    @param enable_debug: If True, run some code to help debugging
     """
     global versions_log
     global yomchi_log
     global caller_file
+    global debug
 
+    debug = enable_debug
     os.makedirs(RESULTS_FOLDER)
     os.makedirs(LOGS_FOLDER)
     os.makedirs(CAPTURES_FOLDER)
