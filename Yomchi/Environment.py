@@ -112,7 +112,7 @@ def print_box(text):
     print_text("|" + "-" * (LINE_LENGTH + 2) + "|")
 
 
-def step(description, new_step_number=0):
+def step(description=None, new_step_number=0):
     """
     Print the current step number with a brief description.
     @param description: Description of the step.
@@ -127,7 +127,11 @@ def step(description, new_step_number=0):
     if new_step_number != 0:
         step_number = new_step_number
 
-    print_box(" " * pad + "Step " + str(step_number) + "\n" + description)
+    text = " " * pad + "Step " + str(step_number)
+    if description is not None:
+        text = text + "\n" + description
+
+    print_box(text)
     step_number += 1
 
 

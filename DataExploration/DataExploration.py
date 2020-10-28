@@ -41,7 +41,7 @@ tf.random.set_seed(51)
 np.random.seed(51)
 
 # Run configuration parameters
-PLOT = False
+PLOT = True
 
 # Session and methods Parameters
 #session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES_771}  # or
@@ -56,11 +56,32 @@ rate_used = data.POSITION_DATA_SAMPLING_RATE
 if sync_method == "Upsample Angles":
     rate_used = data.LFP_DATAMAX_SAMPLING_RATE
 
-Env.print_parameters({"Recording Session Number": session["Number"],
+# Windowing properties
+window_size = 31
+batch_size = 31
+shuffle_buffer = 1000
+lfp_channel = 0
+round_angles = False
+base_angle = 0  # Unused if round_angles = False
+offset_between_angles = 30  # Unused if round_angles = False
+
+extra = {"Round angles to get discrete label": round_angles}
+if round_angles:
+    extra.update({"Angle labels starting from": str(base_angle) + "°",
+                  "until 360° in steps of": str(offset_between_angles) + "°"})
+
+parameters_dictionary = {"Recording Session Number": session["Number"],
                       "Interpolation Method": interpolation.title(),
                       "Synchronization Method": sync_method,
                       "Number of Recorded Channels": str(num_channels),
-                      "Sampling Rate to Use": str(rate_used) + "Hz"})
+                      "Sampling Rate to Use": str(rate_used) + " Hz",
+                      "Window Size": window_size,
+                      "Batch size (# of windows)": batch_size,
+                      "LFP Signal channel to use": lfp_channel,
+                      "Shuffle buffer size": shuffle_buffer}
+
+parameters_dictionary.update(extra)
+Env.print_parameters(parameters_dictionary)
 
 ## <li> Step 1
 # <ul>
@@ -172,11 +193,11 @@ if PLOT:
 # </ul>
 Env.step("Label data by concatenating LFPs and interpolated Angles in a single 2D-array.")
 
-base_angle = 0
-offset_between_angles = 30
-labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1), False)
-#labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1),
-#                               base_angle, offset_between_angles)
+# IF round_angles: Rounding the angles to be descrete labels, starting from 'base_angle'until 360 on steps of
+# 'offset_between_angles'. Else Not rounding the angles to be discrete labels
+labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1), round_angles,
+                               base_angle, offset_between_angles)
+
 if PLOT:
     Env.print_text("Plotting LFP data from channels 0 and interpolated angles data at " + str(rate_used) + "Hz. [°]")
     figname = session["Number"] + "_LFP_C0_and_angles_" + interpolation + "_" + str(rate_used) + "Hz"
@@ -212,22 +233,23 @@ dataframe = data.ndarray_to_dataframe(labeled_data, rate_used)
 clean_frame = data.clean_unsync_boundaries(dataframe)
 clean_dataset = data.clean_unsync_boundaries(labeled_data, False)
 
-labels = np.arange(base_angle, 360, offset_between_angles)
-percentages = []
-for u in range(base_angle, 360, offset_between_angles):
-    percentages.append(round(np.sum(clean_dataset[:, -1] == u)*100/len(clean_dataset[:, -1])))
+if round_angles:
+    labels = np.arange(base_angle, 360, offset_between_angles)
+    percentages = []
+    for u in range(base_angle, 360, offset_between_angles):
+        percentages.append(round(np.sum(clean_dataset[:, -1] == u)*100/len(clean_dataset[:, -1])))
 
-labels_percent = np.concatenate((np.expand_dims(labels, axis=1), np.expand_dims(percentages, axis=1)), axis=1)
-dataframe_labels = pd.DataFrame(data=labels_percent, columns=["Angulos", "Porcentaje"])
+    labels_percent = np.concatenate((np.expand_dims(labels, axis=1), np.expand_dims(percentages, axis=1)), axis=1)
+    dataframe_labels = pd.DataFrame(data=labels_percent, columns=["Angulos", "Porcentaje"])
 
-if PLOT:
-    Env.print_text("Plotting Barplot of Labels after " + interpolation + " interpolation")
-    figname = session["Number"] + "_BarPLotAngles_" + interpolation + "_" + str(rate_used) + "Hz"
-    plt.figure(figname)
-    sns.barplot(x="Angulos", y="Porcentaje", data=dataframe_labels)
-    plt.title("Gráfico de Barras de las etiquetas. Sesión: " + session["Number"] + ".\n Interpolada con: " + interpolation
-              + " a " + str(rate_used) + "Hz")
-    ui.store_figure(figname)
+    if PLOT:
+        Env.print_text("Plotting Barplot of Labels after " + interpolation + " interpolation")
+        figname = session["Number"] + "_BarPLotAngles_" + interpolation + "_" + str(rate_used) + "Hz"
+        plt.figure(figname)
+        sns.barplot(x="Angulos", y="Porcentaje", data=dataframe_labels)
+        plt.title("Gráfico de Barras de las etiquetas. Sesión: " + session["Number"] + ".\n Interpolada con: " +
+                  interpolation + " a " + str(rate_used) + "Hz")
+        ui.store_figure(figname)
 
 ## <li> Step 7
 # <ul>
@@ -304,7 +326,6 @@ if PLOT:
     figname = session["Number"] + "_BoxPLotChannels_" + interpolation + "_" + str(rate_used) + "Hz"
     fig = plt.figure(figname)
 
-if PLOT:
     ## <li> Step 10
     # <ul>
     # <li> Plotting Boxplot of interpolated angles.
@@ -321,19 +342,21 @@ if PLOT:
               + interpolation + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname)
 
+    """ NOT USEFUL INFORMATION. ALSO CRASHES THE EXECUTION
     figname = session["Number"] + "_BoxPLotC0vsAngles_" + interpolation + "_" + str(rate_used) + "Hz"
     plt.figure(figname)
-    sns.boxplot(x=clean_frame["1"], y=clean_frame["Angle"])
+    sns.boxplot(x=clean_frame["E1"], y=clean_frame["Angle"])
     plt.title("Diagrama de caja del canal 0 contra los ángulos.\nSesión: " + session["Number"] + ". Interpolada con: "
               + interpolation + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname, True)
+    """
 
-## <li> Step 10
+## <li> Step 11
     # <ul>
     # <li> Convert data to windowed series.
     # </ul>
-Env.step("Convert data to windowed series.")
-windowed_data = data.channels_to_windows(clean_dataset, 0, 31, 31, 1000)
+Env.step("Convert data to windowed series.", 11)
+windowed_data = data.channels_to_windows(clean_dataset, lfp_channel, window_size, batch_size, shuffle_buffer)
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>

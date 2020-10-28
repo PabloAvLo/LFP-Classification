@@ -207,6 +207,7 @@ def add_labels(lfps, angles, round_labels, start=0, offset=30):
     """
     Env.print_text("Adding labels to the data by concatenating the [" + str(len(lfps)) + " x " + str(len(lfps[0])) +
                    "] LFP data matrix with the [" + str(len(angles)) + "] Angles vector.")
+    Env.print_text("Rounding Labels = " + str(round_labels))
 
     if round_labels:
         if (0 <= start < 360) and (1 <= offset < 360):
@@ -294,9 +295,8 @@ def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer
     # Make each window a numpy array row.
     windowed_data = windowed_data.flat_map(lambda window: window.batch(window_size + 1))
 
-    print("Channel " + str(channel) + " Data:")
-
     if Env.debug:
+        print("Channel " + str(channel) + " Data:")
         for window in windowed_data.take(5):
             print(window.numpy())
 
