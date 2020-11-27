@@ -16,6 +16,8 @@ import Yomchi.Environment as Env
 import Yomchi.preprocessing as data
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
+import time
 
 ## <h1> Feed-Forward Neural Network </h1>
 # <h2> Experiment Setup </h2>
@@ -28,7 +30,7 @@ import tensorflow as tf
 # <li> Specify data properties parameters.
 # </ul>
 # <ol>
-Env.init_environment(True)
+Env.init_environment(True, enable_debug=True)
 
 tf.keras.backend.clear_session()
 tf.random.set_seed(51)
@@ -48,13 +50,13 @@ if sync_method == "Upsample Angles":
     rate_used = data.LFP_DATAMAX_SAMPLING_RATE
 
 # Windowing properties
-window_size = 31
-batch_size = 31
+window_size = 32
+batch_size = 32
 shuffle_buffer = 1000
-lfp_channel = 0
+lfp_channel = 72
 round_angles = False
 base_angle = 0  # Unused if round_angles = False
-offset_between_angles = 30  # Unused if round_angles = False
+offset_between_angles = 1  # Unused if round_angles = False
 
 extra = {"Round angles to get discrete label": round_angles}
 if round_angles:
@@ -107,7 +109,6 @@ elif sync_method == "Upsample Angles":
 # <li> Interpolate angles data using a 'interpolation' approach.
 # <li> Label data by concatenating LFPs and interpolated Angles in a single 2D-array.
 # <li> Clean the labeled dataset from NaN values at the boundaries.
-# <li> Convert the data to a windowed series.
 # </ul>
 Env.step()
 
@@ -123,8 +124,143 @@ clean_dataset = data.clean_unsync_boundaries(labeled_data, False)
 
 Env.print_text("Convert the data to a windowed series.")
 
+## <li> Step 4
+# <ul>
+# <li> Split the data in training set and validation set.
+# <li> Convert the training data to a windowed series.
+# </ul>
+Env.step()
+
+(rows, columns) = clean_dataset.shape
+total_length = int(rows * 0.01)
+train_len = int(total_length * 0.8)
+x_train = clean_dataset[:train_len]
+x_valid = clean_dataset[train_len:total_length]
+
 Env.print_box("INITIALIZING TENSORFLOW")
-windowed_data = data.channels_to_windows(clean_dataset, lfp_channel, window_size, batch_size, shuffle_buffer)
+windowed_data = data.channels_to_windows(x_train, lfp_channel, window_size, batch_size, shuffle_buffer)
+windowed_validation_data = data.channels_to_windows(x_valid, lfp_channel, window_size, batch_size)
+
+## <li> Step 5
+# <ul>
+# <li> Create model: Multi Layer Perceptron (MLP) with:
+# </ul>
+Env.step()
+
+# Parameters
+n_nodes_per_layer = 50
+dropout_rate = 0.60
+n_layers = 2
+epochs = 100
+
+# Create a neural network model
+model = tf.keras.models.Sequential()
+
+# First layer (need to specify the input size)
+print("Adding layer with {} nodes".format(n_nodes_per_layer))
+model.add(tf.keras.layers.Dense(
+    units=n_nodes_per_layer,
+    #input_shape=(columns-1,),
+    input_shape=(window_size,),
+    activation='elu',
+    kernel_initializer='he_normal',
+    bias_initializer='zeros'))
+model.add(tf.keras.layers.Dropout(dropout_rate))
+
+# Other hidden layers
+for n in range(1, n_layers):
+    print("Adding layer with {} nodes".format(n_nodes_per_layer))
+    model.add(tf.keras.layers.Dense(
+        units=n_nodes_per_layer,
+        activation='elu',
+        kernel_initializer='he_normal',
+        bias_initializer='zeros'))
+    model.add(tf.keras.layers.Dropout(dropout_rate))
+
+# Output layer
+print("Adding layer with 1 node")
+model.add(tf.keras.layers.Dense(
+    units=1,
+    activation='softmax',
+    kernel_initializer='glorot_normal',
+    bias_initializer='zeros'))
+
+## <li> Step 6
+# <ul>
+# <li> Define the optimizer
+# <li> Use the Mean Square Error (MSE) as Loss function.
+# </ul>
+Env.step()
+
+# optimizer = keras.optimizers.Adam(lr=0.001)
+optimizer = tf.keras.optimizers.Adadelta(lr=1.0)
+# optimizer = keras.optimizers.Adagrad(lr=0.01)
+
+# Define cost function and optimization strategy
+model.compile(
+    optimizer=optimizer,
+    loss='mse',
+    metrics=['accuracy']
+)
+
+## <li> Step 7
+# <ul>
+# <li> Train the neural network
+# </ul>
+Env.step()
+
+start_time = time.time()
+
+history = model.fit(
+    windowed_data,
+    #x_train[:, :-1],
+    #x_train[:, -1],
+    epochs=epochs,
+    #batch_size=batch_size,
+    validation_data=windowed_validation_data,
+    #validation_data=(x_valid[:, :-1], x_valid[:, -1]),
+    verbose=2
+    )
+
+end_time = time.time()
+print("Training time: ", end_time - start_time)
+
+"""
+# Find the best costs & metrics
+test_accuracy_hist = history.history['val_accuracy']
+best_idx = test_accuracy_hist.index(max(test_accuracy_hist))
+print("Max test accuracy:  {:.4f} at epoch: {}".format(test_accuracy_hist[best_idx], best_idx))
+
+trn_accuracy_hist = history.history['accuracy']
+best_idx = trn_accuracy_hist.index(max(trn_accuracy_hist))
+print("Max train accuracy: {:.4f} at epoch: {}".format(trn_accuracy_hist[best_idx], best_idx))
+
+test_cost_hist = history.history['val_loss']
+best_idx = test_cost_hist.index(min(test_cost_hist))
+print("Min test cost:  {:.5f} at epoch: {}".format(test_cost_hist[best_idx], best_idx))
+
+trn_cost_hist = history.history['loss']
+best_idx = trn_cost_hist.index(min(trn_cost_hist))
+print("Min train cost: {:.5f} at epoch: {}".format(trn_cost_hist[best_idx], best_idx))
+
+"""
+forecast = []
+
+for time in range(total_length - window_size):
+  forecast.append(model.predict(windowed_data[time:time + window_size][np.newaxis]))
+
+forecast = forecast[train_len-window_size:]
+results = np.array(forecast)[:, 0, 0]
+
+plt.figure(figsize=(10, 6))
+
+#ts.plot_series(time_valid, x_valid)
+#ts.plot_series(time_valid, results)
+
+mae = tf.keras.metrics.mean_absolute_error(x_valid, results).numpy()
+print("MAE: ", mae)
+plt.show()
+
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>
