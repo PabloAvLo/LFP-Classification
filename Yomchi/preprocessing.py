@@ -15,6 +15,7 @@
 import os
 import pandas as pd
 import pickle
+import scipy.signal
 import numpy as np
 import tensorflow as tf
 import Yomchi.Environment as Env
@@ -50,6 +51,8 @@ def load_lfp_data(file=LFP_771, channels=EC014_41_NUMBER_OF_CHANNELS):
     lfp = np.reshape(signalsArray, (-1, channels))
     signals.close()
 
+    Env.print_text("LFP Data shape: " + str(np.shape(lfp)))
+
     return lfp
 
 
@@ -77,8 +80,34 @@ def load_angles_data(file=ANGLES_771, degrees=True):
         angles = np.degrees(angles)
         angles += 180
 
+    Env.print_text("Head angle data shape: " + str(np.shape(angles)))
+
     return angles
 
+def downsample_lfps(lfp_data, orig_rate, new_rate):
+    """
+    Downsample the LFP signal data after applying an anti-aliasing filter.
+    An order 8 Chebyshev type I filter is used. Usually the LFP signals are acquired at a higher sampling rate
+    than the position data.
+    @note: This method assumes that the reason of frequencies is 32 to compute the decimation.
+    @param lfp_data: Matrix [n x numChannels] with the LFP signals
+    @param orig_rate: Sampling rate originally used to acquire the data.
+    @param new_rate: New sampling rate of the data.
+    @return resampled_data: Original data downsampled to the new rate.
+    """
+    Env.print_text("Downsampling LFP data to match the new sampling rate: " + str(new_rate)
+                   + "Hz. Original was: " + str(orig_rate) + "Hz.")
+
+    resampled_data = []
+    for channel_i in np.transpose(lfp_data):
+        channel_i = scipy.signal.decimate(channel_i, 8)
+        channel_i = scipy.signal.decimate(channel_i, 4)
+        resampled_data.append(channel_i)
+
+    resampled_data = np.transpose(resampled_data)
+    Env.print_text("LFP data decimated shape: " + str(np.shape(resampled_data)))
+
+    return resampled_data
 
 def angles_expansion(angles_data, orig_rate, new_rate):
     """
@@ -99,6 +128,8 @@ def angles_expansion(angles_data, orig_rate, new_rate):
     upsampled_data = np.concatenate((np.transpose(np.array([angles_data])), padding), axis=1)
     upsampled_data = upsampled_data[:-1, :]
     upsampled_data = upsampled_data.flatten()
+
+    Env.print_text("Head angle data upsampled shape: " + str(np.shape(upsampled_data)))
 
     return upsampled_data
 
@@ -173,26 +204,6 @@ def interpolate_angles(angles_data, method="linear"):
         interpolated_angles = interpolated_angles.to_numpy()
 
     return interpolated_angles
-
-
-def downsample_lfps(lfp_data, orig_rate, new_rate):
-    """
-    Drop samples to match the new sampling rate. Usually the the LFP signals are acquired at a higher sampling rate
-    than the position data.
-    @param lfp_data: Matrix [n x numChannels] with the LFP signals
-    @param orig_rate: Sampling rate originally used to acquire the data.
-    @param new_rate: New sampling rate of the data. The 'extra' samples are not included in the returned data.
-    @return resampled_data: Original data downsampled to the new rate. It only returns the indices that are multiples of
-    the rates reason.
-    """
-    Env.print_text("Downsampling LFP data by dropping 'extra' samples to match the new sampling rate: " + str(new_rate)
-                   + "Hz. Original was: " + str(orig_rate) + "Hz.")
-
-    rate_reason = round(orig_rate/new_rate)
-    resampled_data = lfp_data[::rate_reason]
-    resampled_data = np.append(resampled_data, [lfp_data[-1]], axis=0)
-
-    return resampled_data
 
 
 def add_labels(lfps, angles, round_labels, start=0, offset=30):

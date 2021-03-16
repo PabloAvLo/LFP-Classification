@@ -26,6 +26,7 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.size'] = 18
 plt.rcParams['figure.autolayout'] = True
 plt.rcParams['axes.titlepad'] = 7
+plt.rcParams['axes.grid'] = False
 
 
 def store_figure(fig_name, show=False):
