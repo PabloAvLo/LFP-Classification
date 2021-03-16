@@ -56,7 +56,7 @@ shuffle_buffer = 1000
 lfp_channel = 72
 round_angles = False
 base_angle = 0  # Unused if round_angles = False
-offset_between_angles = 1  # Unused if round_angles = False
+offset_between_angles = 45  # Unused if round_angles = False
 
 extra = {"Round angles to get discrete label": round_angles}
 if round_angles:
@@ -134,8 +134,11 @@ Env.step()
 (rows, columns) = clean_dataset.shape
 total_length = int(rows * 0.01)
 train_len = int(total_length * 0.8)
-x_train = clean_dataset[:train_len]
-x_valid = clean_dataset[train_len:total_length]
+x_train = clean_dataset[:train_len, :]
+x_valid = clean_dataset[train_len:total_length, :]
+
+print("Training data shape: [", len(x_train), ":", len(x_train[0]), "]")
+print("Validation data shape: [", len(x_valid), ":", len(x_valid[0]), "]")
 
 Env.print_box("INITIALIZING TENSORFLOW")
 windowed_data = data.channels_to_windows(x_train, lfp_channel, window_size, batch_size, shuffle_buffer)
@@ -148,10 +151,10 @@ windowed_validation_data = data.channels_to_windows(x_valid, lfp_channel, window
 Env.step()
 
 # Parameters
-n_nodes_per_layer = 50
+n_nodes_per_layer = 500
 dropout_rate = 0.60
-n_layers = 2
-epochs = 100
+n_layers = 3
+epochs = 200
 
 # Create a neural network model
 model = tf.keras.models.Sequential()
@@ -160,9 +163,8 @@ model = tf.keras.models.Sequential()
 print("Adding layer with {} nodes".format(n_nodes_per_layer))
 model.add(tf.keras.layers.Dense(
     units=n_nodes_per_layer,
-    #input_shape=(columns-1,),
     input_shape=(window_size,),
-    activation='elu',
+    activation=tf.nn.relu,
     kernel_initializer='he_normal',
     bias_initializer='zeros'))
 model.add(tf.keras.layers.Dropout(dropout_rate))
@@ -172,7 +174,7 @@ for n in range(1, n_layers):
     print("Adding layer with {} nodes".format(n_nodes_per_layer))
     model.add(tf.keras.layers.Dense(
         units=n_nodes_per_layer,
-        activation='elu',
+        activation=tf.nn.relu,
         kernel_initializer='he_normal',
         bias_initializer='zeros'))
     model.add(tf.keras.layers.Dropout(dropout_rate))
@@ -180,8 +182,8 @@ for n in range(1, n_layers):
 # Output layer
 print("Adding layer with 1 node")
 model.add(tf.keras.layers.Dense(
-    units=1,
-    activation='softmax',
+    units=360,
+    activation=tf.nn.softmax,
     kernel_initializer='glorot_normal',
     bias_initializer='zeros'))
 
@@ -193,7 +195,7 @@ model.add(tf.keras.layers.Dense(
 Env.step()
 
 # optimizer = keras.optimizers.Adam(lr=0.001)
-optimizer = tf.keras.optimizers.Adadelta(lr=1.0)
+optimizer = tf.keras.optimizers.Adadelta(lr=0.001)
 # optimizer = keras.optimizers.Adagrad(lr=0.01)
 
 # Define cost function and optimization strategy
@@ -212,9 +214,9 @@ Env.step()
 start_time = time.time()
 
 history = model.fit(
-    windowed_data,
-    #x_train[:, :-1],
-    #x_train[:, -1],
+    x=windowed_data,
+    #x=x_train[:, :-1],
+    #y=x_train[:, -1],
     epochs=epochs,
     #batch_size=batch_size,
     validation_data=windowed_validation_data,
@@ -222,10 +224,15 @@ history = model.fit(
     verbose=2
     )
 
-end_time = time.time()
-print("Training time: ", end_time - start_time)
+## <li> Step 8
+# <ul>
+# <li> Metrics
+# </ul>
+Env.step()
 
-"""
+end_time = time.time()
+print("Training time: {:.0f}:{:.0f} [m:s]".format((end_time - start_time)/60, (end_time - start_time) % 60))
+
 # Find the best costs & metrics
 test_accuracy_hist = history.history['val_accuracy']
 best_idx = test_accuracy_hist.index(max(test_accuracy_hist))
@@ -243,6 +250,18 @@ trn_cost_hist = history.history['loss']
 best_idx = trn_cost_hist.index(min(trn_cost_hist))
 print("Min train cost: {:.5f} at epoch: {}".format(trn_cost_hist[best_idx], best_idx))
 
+## <li> Step 9
+# <ul>
+# <li> Predict
+# </ul>
+Env.step()
+
+print("----------------------------------------------")
+prediction = model.predict(windowed_validation_data)
+
+unique, counts = np.unique(prediction, return_counts=True)
+print(dict(zip(unique, counts)))
+
 """
 forecast = []
 
@@ -257,10 +276,10 @@ plt.figure(figsize=(10, 6))
 #ts.plot_series(time_valid, x_valid)
 #ts.plot_series(time_valid, results)
 
-mae = tf.keras.metrics.mean_absolute_error(x_valid, results).numpy()
-print("MAE: ", mae)
+mse = tf.keras.metrics.mean_squared_error(x_valid, results).numpy()
+print("MSE: ", mse)
 plt.show()
-
+"""
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>

@@ -1,0 +1,78 @@
+#######################################################################################################
+#                                                                                                     #
+#                                      University of Costa Rica                                       #
+#                                  Electrical Engineering Department                                  #
+#                                            Grade Thesis                                             #
+#                                        Pablo Avila [B30724]                                         #
+#                                      jose.avilalopez@ucr.ac.cr                                      #
+#                                                                                                     #
+#######################################################################################################
+                                       *** START OF TEST ***  
+# File      : DataExploration.py
+# Date      : 07-06-2020
+# Start Time: 17:43:34
+
+
+|------------------------------------------------------------------------------------------------------|
+|                                          *** Parameters ***                                          |
+|                                                                                                      |
+| Recording Session Number    : 765                                                                    |
+| Interpolation Method        : Quadratic                                                              |
+| Synchronization Method      : Pad angles                                                             |
+| Number of Recorded Channels : 99                                                                     |
+| Sampling Rate to Use        : 1250Hz                                                                 |
+|------------------------------------------------------------------------------------------------------|
+
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 1                                                 |
+| Importing LFP data from session: 765                                                                 |
+|------------------------------------------------------------------------------------------------------|
+Loading LFP Data of 99 channels from: ec014.765.eeg.
+Plotting LFP data from channels 0 and 97 at 1250Hz
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 2                                                 |
+| Importing angles data from session: 765                                                              |
+|------------------------------------------------------------------------------------------------------|
+Loading the animal position data from: ec014.765.whl.
+Plotting Angles data [°] at 39.06Hz
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 3                                                 |
+| Pad angles data to reach a higher sampling rate                                                      |
+|------------------------------------------------------------------------------------------------------|
+Padding angles data with 'NaN' values to match the new sampling rate: 1250Hz. Original was: 39.06Hz.
+Plotting Angles data padded with 'NaN' [°]
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 4                                                 |
+| Interpolate angles data using a quadratic approach.                                                  |
+|------------------------------------------------------------------------------------------------------|
+Interpolate angles data using quadratic method.
+Plotting Angles data after quadratic interpolation [°]
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 5                                                 |
+| Label data by concatenating LFPs and interpolated Angles in a single 2D-array.                       |
+|------------------------------------------------------------------------------------------------------|
+Adding labels to the data by concatenating the [3514368 x 99] LFP data matrix with the [3514368] Angles vector.
+Plotting LFP data from channels 0 and interpolated angles data at 1250Hz. [°]
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 6                                                 |
+| Clean the labeled dataset from NaN values at the boundaries.                                         |
+|------------------------------------------------------------------------------------------------------|
+Number of NaNs in Angles Data without interpolation: 3412214
+Number of NaNs in Labeled Dataset with interpolated Angles Data: 75775
+Number of NaNs at the beginning of the interpolated Angles Data: 63264
+Number of NaNs at the end of the interpolated Angles Data: 12511
+Number of NaNs in Labeled and Clean Dataset with interpolated Angles Data: 0
+Number of NaNs in Labeled and Clean DataFRAME with interpolated Angles Data: 0
+Plotting clean LFP data from channels 0 and interpolated angles data at 1250Hz. [°]
+
+#######################################################################################################
+                                       *** END OF TEST ***  
+# Test Duration : 00:0:20
+# Finish Time   : 17:43:54
+#######################################################################################################

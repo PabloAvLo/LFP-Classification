@@ -104,7 +104,7 @@ if PLOT:
     plt.plot(lfp_data[:, 97], "xb")
     plt.title("Señal LFP. Sesión: " + session["Number"] + " del Canal 97 a "
               + str(data.LFP_DATAMAX_SAMPLING_RATE) + "Hz")
-    ui.store_figure(figname)
+    ui.store_figure(figname, True)
 
 ## <li> Step 2
 # <ul>
@@ -124,7 +124,7 @@ if PLOT:
     plt.plot(angles_data[:], "xr")
     plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + " a "
               + str(data.POSITION_DATA_SAMPLING_RATE) + "Hz")
-    ui.store_figure(figname)
+    ui.store_figure(figname, True)
 
 if sync_method == "Downsample LFPs":
     ## <li> Step 3
@@ -147,7 +147,7 @@ if sync_method == "Downsample LFPs":
         plt.subplot(212)
         plt.plot(lfp_data[:, 97], "xb")
         plt.title("Señal LFP del Canal 97 a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
-        ui.store_figure(figname)
+        ui.store_figure(figname, True)
 
 elif sync_method == "Upsample Angles":
     ## <li> Step 3
@@ -165,7 +165,7 @@ elif sync_method == "Upsample Angles":
         plt.figure(figname)
         plt.plot(angles_data[:], "xb")
         plt.title("Información de ángulos [°] expandida a " + str(rate_used) + "Hz. Sesión: " + session["Number"])
-        ui.store_figure(figname)
+        ui.store_figure(figname, True)
 
 ## <li> Step 4
 # <ul>
@@ -183,7 +183,7 @@ if PLOT:
     plt.plot(angles_data_interpolated[:], "xr")
     plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + ".\n Interpolada con: " + interpolation
               + " a " + str(rate_used) + "Hz")
-    ui.store_figure(figname)
+    ui.store_figure(figname, True)
 
 ## <li> Step 5
 # <ul>
@@ -210,7 +210,7 @@ if PLOT:
     plt.plot(labeled_data[:, -1], "xb")
     plt.title("Información de ángulos [°]. Sesión: " + session["Number"] + ".\n Interpolada con: " + interpolation
               + " a " + str(rate_used) + "Hz")
-    ui.store_figure(figname)
+    ui.store_figure(figname, True)
 
 if session["Number"] == "771" and sync_method == "Downsample LFPs":
     Env.print_text("\nAngles Data from: 15560 to 15600 where at 15566 the first LED is lost and at 15583 both are lost")
@@ -249,7 +249,7 @@ if round_angles:
         sns.barplot(x="Angulos", y="Porcentaje", data=dataframe_labels)
         plt.title("Gráfico de Barras de las etiquetas. Sesión: " + session["Number"] + ".\n Interpolada con: " +
                   interpolation + " a " + str(rate_used) + "Hz")
-        ui.store_figure(figname)
+        ui.store_figure(figname, True)
 
 ## <li> Step 7
 # <ul>
@@ -297,7 +297,7 @@ if PLOT:
     plt.plot(labeled_data[:, -1], "xb")
     plt.title("Información de ángulos [°] limpia. Sesión: " + session["Number"] + ".\n Interpolada con: "
               + interpolation + " a " + str(rate_used) + "Hz")
-    ui.store_figure(figname)
+    ui.store_figure(figname, True)
 
     ## <li> Step 9
     # <ul>
@@ -312,7 +312,7 @@ if PLOT:
     plt.xlabel("Voltaje")
     plt.title("Diagrama de caja de los canales 0-49.\nSesión: " + session["Number"] + ". Interpolada con: "
               + interpolation + " a " + str(rate_used) + "Hz")
-    ui.store_figure(figname)
+    ui.store_figure(figname, True)
 
     figname = session["Number"] + "_BoxPLot50-98_" + interpolation + "_" + str(rate_used) + "Hz"
     plt.figure(figname, figsize=[12, 16])
@@ -321,7 +321,7 @@ if PLOT:
     plt.xlabel("Voltaje")
     plt.title("Diagrama de caja de los canales 50-98.\nSesión: " + session["Number"] + ". Interpolada con: "
               + interpolation + " a " + str(rate_used) + "Hz")
-    ui.store_figure(figname)
+    ui.store_figure(figname, True)
 
     figname = session["Number"] + "_BoxPLotChannels_" + interpolation + "_" + str(rate_used) + "Hz"
     fig = plt.figure(figname)
@@ -340,7 +340,7 @@ if PLOT:
     plt.xlabel("Ángulos")
     plt.title("Diagrama de caja de los ángulos.\nSesión: " + session["Number"] + ". Interpolada con: "
               + interpolation + " a " + str(rate_used) + "Hz")
-    ui.store_figure(figname)
+    ui.store_figure(figname, True)
 
     """ NOT USEFUL INFORMATION. ALSO CRASHES THE EXECUTION
     figname = session["Number"] + "_BoxPLotC0vsAngles_" + interpolation + "_" + str(rate_used) + "Hz"
@@ -348,7 +348,7 @@ if PLOT:
     sns.boxplot(x=clean_frame["E1"], y=clean_frame["Angle"])
     plt.title("Diagrama de caja del canal 0 contra los ángulos.\nSesión: " + session["Number"] + ". Interpolada con: "
               + interpolation + " a " + str(rate_used) + "Hz")
-    ui.store_figure(figname, True)
+    ui.store_figure(figname, True, True)
     """
 
 ## <li> Step 11
