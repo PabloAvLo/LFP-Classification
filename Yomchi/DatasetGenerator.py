@@ -37,11 +37,12 @@ Env.init_environment(True)
 np.random.seed(51)
 
 # Session and methods Parameters
+# The recording session 771 has a 23.81% of invalid positions, while the session 765 has only 6.98%
 #session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES_771}  # or
 session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
 
 interpolation = "SLERP"  # "linear" "quadratic" "cubic" "nearest" "SLERP"
-sync_method = "Downsample LFPs"  # "Upsample Angles" "Downsample LFPs"
+sync_method = "Upsample Angles"  # "Upsample Angles" "Downsample LFPs"
 
 # Data Properties
 num_channels = data.EC014_41_NUMBER_OF_CHANNELS
@@ -111,33 +112,42 @@ elif sync_method == "Upsample Angles":
 
 ## <li> Step 4
 # <ul>
-# <li> Interpolate angles data using a 'interpolation' approach.
+# <li> Label data by concatenating LFPs and Angles in a single 2D-array.
 # </ul>
-Env.step("Interpolate angles data using a " + interpolation + " approach.", 4)
+Env.step("Label data by concatenating LFPs and interpolated Angles in a single 2D-array.")
 
-angles_data_interpolated = data.interpolate_angles(angles_data, interpolation)
+# IF round_angles: Rounding the angles to be discrete labels, starting from 'base_angle' until 360 on steps of
+# 'offset_between_angles'. Else, the angles are not rounded to discrete labels.
+labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data, axis=1), round_angles,
+                               base_angle, offset_between_angles)
 
 
 ## <li> Step 5
 # <ul>
-# <li> Label data by concatenating LFPs and interpolated Angles in a single 2D-array.
+# <li> Clean the labeled dataframe from -1 values, which represent the wrongly acquired positional samples.
 # </ul>
-Env.step("Label data by concatenating LFPs and interpolated Angles in a single 2D-array.")
+Env.step("Clean the labeled dataset from discontinuities in positional data (angles).")
 
-# IF round_angles: Rounding the angles to be descrete labels, starting from 'base_angle'until 360 on steps of
-# 'offset_between_angles'. Else Not rounding the angles to be discrete labels
-labeled_data = data.add_labels(lfp_data, np.expand_dims(angles_data_interpolated, axis=1), round_angles,
-                               base_angle, offset_between_angles)
+clean_datasets = data.clean_invalid_positional(labeled_data)
+
 
 ## <li> Step 6
 # <ul>
-# <li> Convert labeled dataset to a dataframe.
-# <li> Clean the labeled dataframe from NaN values at the boundaries.
+# <li> Interpolate angles data using a 'interpolation' approach.
 # </ul>
-Env.step("Clean the labeled dataset from NaN values at the boundaries.")
+Env.step("Interpolate angles data using a " + interpolation + " approach.", 4)
 
-dataframe = data.ndarray_to_dataframe(labeled_data, rate_used)
-clean_frame = data.clean_unsync_boundaries(dataframe)
+labeled_data_interpolated = labeled_data[:, :-1]
+labeled_data_interpolated[:, -1] = data.interpolate_angles(labeled_data[:, -1], interpolation)
+
+
+## <li> Step 7
+# <ul>
+# <li> Convert labeled dataset to a dataframe.
+# </ul>
+Env.step("Convert labeled dataset to a dataframe.")
+
+#dataframe = data.ndarray_to_dataframe(labeled_data, rate_used)
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>

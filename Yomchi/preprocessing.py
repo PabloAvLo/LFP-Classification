@@ -72,7 +72,7 @@ def load_angles_data(file=ANGLES_771, degrees=True):
     positions = np.genfromtxt(fname=positions_file, dtype=np.float16, delimiter='\t')
     positions_file.close()
 
-    positions[positions == -1] = np.NaN
+    positions[positions == -1] = np.NAN
     angles = np.arctan2((np.subtract(positions[:, 3], positions[:, 1])),
                         (np.subtract(positions[:, 2], positions[:, 0])))
 
@@ -80,7 +80,11 @@ def load_angles_data(file=ANGLES_771, degrees=True):
         angles = np.degrees(angles)
         angles += 180
 
+    angles[np.isnan(angles)] = -1
+    invalid = np.count_nonzero(angles == -1)
+
     Env.print_text("Head angle data shape: " + str(np.shape(angles)))
+    Env.print_text(f"Head angle invalid data: {invalid:d} ({invalid/len(angles) * 100:.2f}%)")
 
     return angles
 
@@ -113,12 +117,12 @@ def angles_expansion(angles_data, orig_rate, new_rate):
     """
     Fill angular data with 'NaN' values to match an expected sampling rate. Usually the position data is acquired at a
     lower sampling rate than the LFP signals.
-    @details Assuming that the acquisition of data started and stopped at the same time, then no data has to be added at
+    @details Assuming that the acquisition of data started and stopped at the same time, then no data has to be added
     after the last sample.
     @param angles_data: Array with the angles data extracted from the animal positions.
     @param orig_rate: Sampling rate originally used to acquire the data.
     @param new_rate: New sampling rate of the data. The gaps are filled with 'NaN'.
-    @return upsampled_data: Original data filled with zeros to match the new sampling rate.
+    @return upsampled_data: Original data filled with 'NaN' to match the new sampling rate.
     """
     Env.print_text("Expanding angles data with 'NaN' values to match the new sampling rate: " + str(new_rate) + "Hz. "
                    + "Original was: " + str(orig_rate) + "Hz.")
@@ -129,7 +133,7 @@ def angles_expansion(angles_data, orig_rate, new_rate):
     upsampled_data = upsampled_data[:-1, :]
     upsampled_data = upsampled_data.flatten()
 
-    Env.print_text("Head angle data upsampled shape: " + str(np.shape(upsampled_data)))
+    Env.print_text("Angles data upsampled shape: " + str(np.shape(upsampled_data)))
 
     return upsampled_data
 
@@ -240,24 +244,67 @@ def add_labels(lfps, angles, round_labels, start=0, offset=30):
     return labeled_data
 
 
-def clean_unsync_boundaries(labeled_dataset, is_dataframe=True):
+def clean_invalid_positional(labeled_dataset, is_dataframe=False):
     """
-    Clean the data rows which have 'NaN' values as labels (angles) from the beginning and end of the data.
-    @details At the beginning and at the end of the recording sessions, the LEDs of position are unsynchronized,
-    hence '-1' values are used instead to denote invalid position data. These values were replaced by 'NaN' and are
-    meant to be removed from the data since they are not representative labels.
+    Clean the data rows which have '-1' values as labels (angles) from the the data and their LFPs associated in each channel.
+    @details The positional data taken from the LEDs placed in the rat have discontinuities where the one or both LEDs
+    are lost, making them invalid.
+    Hence '-1' values are used instead to denote invalid position data and are meant to be removed from the data since
+    they are not representative labels.
     @param labeled_dataset: Matrix [n x (numChannels +1)] with the LFP signals used as the preliminary features of the
     data and the angles data extracted from the positions used as the labels of the data.
     @param is_dataframe: If set, manage the input labeled dataset as a Pandas Dataframe, or a Numpy array otherwise.
-    @return clean_dataset: Input data without 'NaN' values in the beginning nor the end.
+    @return clean_dataset: Input data without invalid positional values.
     """
 
     if is_dataframe:
-        clean_dataset = labeled_dataset[~np.isnan(labeled_dataset["Angle"])]
+        clean_dataset = labeled_dataset[labeled_dataset["Angles"] != -1]
     else:
-        clean_dataset = labeled_dataset[~np.isnan(labeled_dataset[:, -1])]
 
-    return clean_dataset
+        # Get the indexes of all invalid values (-1) plus the 31 following padded values (NaN).
+        # and save that range as an element of 'invalid_indexes' array.
+        invalid_indexes = [np.arange(i, i+32).tolist() for i, v in enumerate(labeled_dataset) if v[-1] == -1]
+        Env.print_text(f"Amount of invalid indexes: {len(invalid_indexes)}")
+
+        # Merge all sublists as a single consecutive array of invalid indexes.
+        invalid_indexes = [item for sublist in invalid_indexes for item in sublist]
+        Env.print_text(f"Amount of invalid indexes + associated expanded indexes: {len(invalid_indexes)}")
+        Env.print_text(f"Number of valid samples: {len(labeled_dataset) - len(invalid_indexes)}")
+
+        # Get the indexes where the discontinuities start and end.
+        discontinuities_starts = [invalid_indexes[0]]
+        discontinuities_ends = []
+        for i in range(1, len(invalid_indexes)):
+            if invalid_indexes[i] - 1 != invalid_indexes[i-1]:
+                discontinuities_starts.append(invalid_indexes[i])
+                discontinuities_ends.append(invalid_indexes[i-1])
+        discontinuities_ends.append(invalid_indexes[-1])
+
+        # Stores sub-arrays of valid indexes:
+        clean_datasets = []
+
+        # From the first item to the start of the first discontinuity
+        if discontinuities_starts[0] != 0:
+            clean_datasets.append(labeled_dataset[0:discontinuities_starts[0], :])
+
+        # From the end+1 of the ith discontinuity to the start (not included) of the ith + 1 discontinuity
+        for i in range(len(discontinuities_starts)-1):
+            clean_datasets.append(labeled_dataset[discontinuities_ends[i]+1:discontinuities_starts[i+1], :])
+
+        # From the end of the last discontinuity to the last item.
+        if discontinuities_ends[-1] != len(labeled_dataset)-1:
+            clean_datasets.append(labeled_dataset[discontinuities_ends[-1] + 1:-1, :])
+
+        # Delete subsets with only 1 valid sample (i.e its lenght is <=32)
+        # From the resulting subsets, delete the last 31 rows with NaN angles
+        clean_datasets = [v[:-31, :] for v in clean_datasets if len(v) > 32]
+
+        # Calculate the final number of valid samples
+        lenghts_of_subsets = [len(sublist) for sublist in clean_datasets]
+        resulting_samples = np.sum(lenghts_of_subsets)
+        Env.print_text(f"Total number of samples in valid subsets: {resulting_samples}")
+
+    return clean_datasets
 
 
 def ndarray_to_dataframe(dataset, rate):
@@ -266,16 +313,16 @@ def ndarray_to_dataframe(dataset, rate):
     @param dataset: Matrix [n x (numChannels +1)] with the LFP signals used as the preliminary features
     of the data and the angles data extracted from the positions used as the labels of the data.
     @param rate:
-    @return dataframe: Pandas data frame with Electrode_0-99 and Angles as columns names, and the timestamp as indeces
+    @return dataframe: Pandas data frame with Channels 0-99 and Angles as columns names, and the timestamp as indexes
     calculated as 1/rate * 1e6 to get the time step of the acquisition in microseconds.
     """
 
     columns = []
     for i in range(0, 99):
-        columns.append("E" + str(i))
-    columns.append("Angle")
+        columns.append("Channel " + str(i))
+    columns.append("Angles")
 
-    time_step = round((1/rate) * 1e6)   # 1/f [us]: 1250Hz => 800us, 39.006Hz => 25602us
+    time_step = round((1/rate) * 1e6)   # 1/f [us]: 1250Hz => 800us, 39.06Hz => 2560.164us
     indeces = np.arange(0, len(dataset) * time_step, time_step)
     dataframe = pd.DataFrame(data=dataset, columns=columns, index=indeces)
 
