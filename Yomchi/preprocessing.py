@@ -186,6 +186,12 @@ def vectorized_slerp(angles_data):
                     interpolated_angles[j] = slerp(start_angle, end_angle, amount)
                 start_angle = np.nan
 
+    # valid_angles = [index for index, v in enumerate(angles_data) if ~np.isnan(v)]
+    # starts = valid_angles[:-1]
+    # ends = valid_angles[1:]
+    #
+    # interpolated_angles_new = [slerp(starts[a], ends[a], (a+1) * 1/(ends[a] - starts[a] + 1)) for a in range(len(starts))]
+
     return interpolated_angles
 
 
@@ -269,7 +275,8 @@ def clean_invalid_positional(labeled_dataset, is_dataframe=False):
         # Merge all sublists as a single consecutive array of invalid indexes.
         invalid_indexes = [item for sublist in invalid_indexes for item in sublist]
         Env.print_text(f"Amount of invalid indexes + associated expanded indexes: {len(invalid_indexes)}")
-        Env.print_text(f"Number of valid samples: {len(labeled_dataset) - len(invalid_indexes)}")
+        Env.print_text(f"Number of valid samples: {len(labeled_dataset) - len(invalid_indexes)} (including the 31 NaN "
+                       f"values padded for the last real positional data.)")
 
         # Get the indexes where the discontinuities start and end.
         discontinuities_starts = [invalid_indexes[0]]
@@ -299,10 +306,9 @@ def clean_invalid_positional(labeled_dataset, is_dataframe=False):
         # From the resulting subsets, delete the last 31 rows with NaN angles
         clean_datasets = [v[:-31, :] for v in clean_datasets if len(v) > 32]
 
-        # Calculate the final number of valid samples
-        lenghts_of_subsets = [len(sublist) for sublist in clean_datasets]
-        resulting_samples = np.sum(lenghts_of_subsets)
-        Env.print_text(f"Total number of samples in valid subsets: {resulting_samples}")
+        Env.print_text(f"Total number of valid subsets: {len(clean_datasets)}")
+        for s in range(0, len(clean_datasets)):
+            Env.print_text(f"Total number of samples and channels + angles in subsets {s}: {clean_datasets[s].shape}")
 
     return clean_datasets
 
@@ -354,15 +360,16 @@ def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer
     windowed_data = windowed_data.flat_map(lambda window: window.batch(window_size))
 
     if Env.debug:
-        print("Channel " + str(channel) + " Data:")
+        print(f"Channel {channel} Data:")
         for window in windowed_data.take(5):
             print(window.numpy())
 
     # Get the average angle for each window.
-    labels = average_angles(labels, window_size)
+    #labels = average_angles(labels, window_size)
+    labels_ds = tf.data.Dataset.from_tensor_slices(labels)
 
     # Add labels to the data
-    windowed_ds = tf.data.Dataset.zip((windowed_data, labels))
+    windowed_ds = tf.data.Dataset.zip((windowed_data, labels_ds))
 
     if shuffle_buffer != None:
         # Shuffle the data in groups of shuffle_buffer to accelerate. Instead of shuffle it all at once.
