@@ -34,7 +34,7 @@ import pickle
 # <li> Specify data properties parameters.
 # </ul>
 # <ol>
-Env.init_environment(True)
+Env.init_environment(True, True)
 
 tf.keras.backend.clear_session()
 tf.random.set_seed(51)
@@ -42,9 +42,7 @@ np.random.seed(51)
 
 # Session and methods Parameters
 # The recording session 771 has a 23.81% of invalid positions, while the session 765 has only 6.98%
-session = {"Number": "771", "LFP Data": data.LFP_771, "Angles Data": data.ANGLES_771}  # or
-#session = {"Number": "765", "LFP Data": data.LFP_765, "Angles Data": data.ANGLES_765}
-
+session = 771  # or 765
 interpolation = "SLERP"  # "linear" "quadratic" "cubic" "nearest" "SLERP"
 sync_method = "Upsample Angles"  # "Upsample Angles" "Downsample LFPs"
 
@@ -68,10 +66,9 @@ if round_angles:
     extra.update({"Angle labels starting from": str(base_angle) + "°",
                   "until 360° in steps of": str(offset_between_angles) + "°"})
 
-o_pickle_file_name = f"S-{session['Number']}_I-{interpolation}_F-{rate_used}" \
-                     f"_W-{int(window_size*1e3/rate_used)}ms.pickle"
+o_pickle_file_name = f"S-{session}_I-{interpolation}_F-{rate_used}_W-{int(window_size*1e3/rate_used)}ms.pickle"
 
-parameters_dictionary = {"Recording Session Number": session["Number"],
+parameters_dictionary = {"Recording Session Number": str(session),
                       "Interpolation Method": interpolation.title(),
                       "Synchronization Method": sync_method,
                       "Number of Recorded Channels": str(num_channels),
@@ -88,15 +85,15 @@ Env.print_parameters(parameters_dictionary)
 # <ul>
 # <li> Import LFP data.
 # </ul>
-Env.step("Importing LFP data from session: " + session["Number"])
-lfp_data = data.load_lfp_data(session["LFP Data"])
+Env.step(f"Importing LFP data from session: {session}")
+lfp_data = data.load_lfp_data(data.LFP[session])
 
 ## <li> Step 2
 # <ul>
 # <li> Import angles data.
 # </ul>
-Env.step("Importing angles data from session: " + session["Number"])
-angles_data = data.load_angles_data(session["Angles Data"])
+Env.step(f"Importing angles data from session: {session}")
+angles_data = data.load_angles_data(data.ANGLES[session])
 
 if sync_method == "Downsample LFPs":
     ## <li> Step 3
@@ -162,18 +159,18 @@ for i in range(len(clean_interpolated_data)):
 Env.step("Plotting Angles and one channel of the LFPs after cleaning and interpolation.")
 
 Env.print_text(f"Plotting Angles data [°] at {rate_used}Hz")
-figname = f"{session['Number']}_Angles_degrees_{rate_used}Hz"
+figname = f"{session}_Angles_degrees_{rate_used}Hz"
 plt.figure(figname)
 plt.plot(clean_interpolated_data[4][:, -1], "xr")
-plt.title(f"Información de ángulos [°]. Sesión: {session['Number']} a {rate_used}Hz")
+plt.title(f"Información de ángulos [°]. Sesión: {session} a {rate_used}Hz")
 ui.store_figure(figname, show=Env.debug)
 
 Env.print_text(f"Plotting LFP Channel {lfp_channel} at {rate_used}Hz")
 
-figname = f"{session['Number']}_LFP_c{lfp_channel}_{rate_used}Hz"
+figname = f"{session}_LFP_c{lfp_channel}_{rate_used}Hz"
 plt.figure(figname)
 plt.plot(clean_interpolated_data[4][:, lfp_channel], "x-r")
-plt.title(f"Información de LFPs Canal {lfp_channel}. Sesión: {session['Number']} a {rate_used}Hz")
+plt.title(f"Información de LFPs Canal {lfp_channel}. Sesión: {session} a {rate_used}Hz")
 ui.store_figure(figname, show=Env.debug)
 
 ## <li> Step 8
@@ -196,10 +193,10 @@ preferred_angle = angles.index(max(angles))
 Env.print_text(f" Preferred angle according to LFP Channel {lfp_channel}: {preferred_angle}°")
 
 Env.print_text(f"Plotting Preferred angle according to LFP Channel {lfp_channel}")
-figname = f"{session['Number']}_preferred_angle_LFP_c{lfp_channel}_{rate_used}Hz"
+figname = f"{session}_preferred_angle_LFP_c{lfp_channel}_{rate_used}Hz"
 plt.figure(figname)
 plt.plot(range(360), angles, "x-r")
-plt.title(f"Potencia de LFPs en el Canal {lfp_channel} por angulo. Sesión: {session['Number']} a {rate_used}Hz")
+plt.title(f"Potencia de LFPs en el Canal {lfp_channel} por angulo. Sesión: {session} a {rate_used}Hz")
 ui.store_figure(figname, show=Env.debug)
 
 ## <li> Step 9
@@ -253,7 +250,12 @@ train_data = data.channels_to_windows(train_array, lfp_channel, window_size, bat
 val_data = data.channels_to_windows(valid_array, lfp_channel, window_size, batch_size, shuffle_buffer)
 test_data = data.channels_to_windows(test_array, lfp_channel, window_size, batch_size, shuffle_buffer)
 
+# TODO: The shape should be (batch, time, features) to be compatible with what tensorflow expects as default.
+for example_inputs, example_labels in train_data.take(1):
+  Env.print_text(f'Inputs shape (batch, samples): {example_inputs.shape}')
+  Env.print_text(f'Labels shape (batch, labels): {example_labels.shape}')
+
 # </ol>
 ## <h2> Finish Test and Exit </h2>
-#Env.finish_test()
-Env.finish_test(session["Number"] + "_" + interpolation.title() + "_" + sync_method.replace(" ", ""))
+Env.finish_test()
+#Env.finish_test(session["Number"] + "_" + interpolation.title() + "_" + sync_method.replace(" ", ""))

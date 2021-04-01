@@ -22,10 +22,10 @@ import Yomchi.Environment as Env
 
 # Dataset Paths
 PATH_TO_DATASETS = os.path.join(Env.CURRENT_FOLDER, "../Datasets/")
-LFP_765     = PATH_TO_DATASETS + "ec014.765.eeg"
-ANGLES_765  = PATH_TO_DATASETS + "ec014.765.whl"
-LFP_771     = PATH_TO_DATASETS + "ec014.771.eeg"
-ANGLES_771  = PATH_TO_DATASETS + "ec014.771.whl"
+LFP = {765: PATH_TO_DATASETS + "ec014.765.eeg",
+       771: PATH_TO_DATASETS + "ec014.771.eeg"}
+ANGLES = {765: PATH_TO_DATASETS + "ec014.765.whl",
+          771: PATH_TO_DATASETS + "ec014.771.whl"}
 
 # Sampling Rates
 RAW_DATAMAX_SAMPLING_RATE   = 20000  ## 20 kHz
@@ -36,7 +36,7 @@ POSITION_DATA_SAMPLING_RATE = 39.06  ## 39.06 Hz
 EC014_41_NUMBER_OF_CHANNELS = 99     ## 16 shank probes with 8 electrodes each, minus bad channels.
 
 
-def load_lfp_data(file=LFP_771, channels=EC014_41_NUMBER_OF_CHANNELS):
+def load_lfp_data(file=LFP[771], channels=EC014_41_NUMBER_OF_CHANNELS):
     """
     Loads the LFP signals from a .eeg file (LFP Data only f < 625Hz) or a .dat file (LFP Data + Spikes).
     @param file: Path to the file containing the animal LFP data.
@@ -56,7 +56,7 @@ def load_lfp_data(file=LFP_771, channels=EC014_41_NUMBER_OF_CHANNELS):
     return lfp
 
 
-def load_angles_data(file=ANGLES_771, degrees=True):
+def load_angles_data(file=ANGLES[771], degrees=True):
     """
     Loads the animal position data from a .whl file which contain 2 (x, y) pairs, one for each LED. If any position
     value equals '-1' then it's replaced with 'NaN' instead.
@@ -325,7 +325,7 @@ def ndarray_to_dataframe(dataset, rate):
 
     columns = []
     for i in range(0, 99):
-        columns.append("Channel " + str(i))
+        columns.append(f"Channel {i}")
     columns.append("Angles")
 
     time_step = round((1/rate) * 1e6)   # 1/f [us]: 1250Hz => 800us, 39.06Hz => 2560.164us
@@ -361,12 +361,12 @@ def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer
 
     if Env.debug:
         print(f"Channel {channel} Data:")
-        for window in windowed_data.take(5):
+        for window in windowed_data.take(1):
             print(window.numpy())
 
     # Get the average angle for each window.
-    #labels = average_angles(labels, window_size)
-    labels_ds = tf.data.Dataset.from_tensor_slices(labels)
+    #labels_ds = average_angles(labels, window_size)
+    labels_ds = tf.data.Dataset.from_tensor_slices(np.expand_dims(labels, axis=1))
 
     # Add labels to the data
     windowed_ds = tf.data.Dataset.zip((windowed_data, labels_ds))
@@ -379,7 +379,7 @@ def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer
     windowed_ds = windowed_ds.batch(batch_size).prefetch(1)
 
     if Env.debug:
-        for x, y in windowed_ds.take(5):
+        for x, y in windowed_ds.take(1):
             print("x = ", x.numpy())
             print("y = ", y.numpy())
 
@@ -407,9 +407,9 @@ def average_angles(angles, window_size):
 
     if Env.debug:
         print("Angles:")
-        for window in windowed_angles.take(5):
+        for window in windowed_angles.take(1):
             print(window.numpy())
-        for window in averaged_angles.take(5):
+        for window in averaged_angles.take(1):
             print(window.numpy())
 
     return averaged_angles
