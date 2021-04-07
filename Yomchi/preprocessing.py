@@ -347,11 +347,16 @@ def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer
     @return windowed_ds: LFP data of the selected channel separated in windows.
     """
 
+    labels = np.expand_dims(series[window_size::, -1], 1)
     data = series[:, channel]
-    labels = series[window_size::, -1]
+
+    # Get the average angle for each window.
+    #labels_ds = average_angles(labels, window_size)
+
+    labels_ds = tf.data.Dataset.from_tensor_slices(np.expand_dims(labels, 1))
 
     # Creates a dataset from the input
-    windowed_data = tf.data.Dataset.from_tensor_slices(data)
+    windowed_data = tf.data.Dataset.from_tensor_slices(np.expand_dims(data, 1))
 
     # Split the data set in windows shifting each window by 1 and forcing them to the same size (window_size + 1)
     windowed_data = windowed_data.window(window_size, shift=1, drop_remainder=True)
@@ -363,10 +368,6 @@ def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer
         print(f"Channel {channel} Data:")
         for window in windowed_data.take(1):
             print(window.numpy())
-
-    # Get the average angle for each window.
-    #labels_ds = average_angles(labels, window_size)
-    labels_ds = tf.data.Dataset.from_tensor_slices(np.expand_dims(labels, axis=1))
 
     # Add labels to the data
     windowed_ds = tf.data.Dataset.zip((windowed_data, labels_ds))

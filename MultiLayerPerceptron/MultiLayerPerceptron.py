@@ -84,8 +84,8 @@ val_data = data.channels_to_windows(valid_array, lfp_channel, window_size, batch
 test_data = data.channels_to_windows(test_array, lfp_channel, window_size, batch_size, shuffle_buffer)
 
 for example_inputs, example_labels in train_data.take(1):
-  Env.print_text(f'Inputs shape (batch, samples): {example_inputs.shape}')
-  Env.print_text(f'Labels shape (batch, labels): {example_labels.shape}')
+  Env.print_text(f'Inputs shape (batch, time, samples): {example_inputs.shape}')
+  Env.print_text(f'Labels shape (batch, time, labels): {example_labels.shape}')
 
 ## <li> Step 5
 # <ul>
@@ -98,7 +98,7 @@ units_per_layer = 64
 dropout = None
 # dropout = 0.60
 layers = 3
-epochs = 20
+epochs = 2
 
 model = models.MLP(layers, units_per_layer, dropout)
 

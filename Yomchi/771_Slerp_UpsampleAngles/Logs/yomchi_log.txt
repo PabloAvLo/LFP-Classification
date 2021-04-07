@@ -1,0 +1,166 @@
+#######################################################################################################
+#                                                                                                     #
+#                                      University of Costa Rica                                       #
+#                                  Electrical Engineering Department                                  #
+#                                            Grade Thesis                                             #
+#                                        Pablo Avila [B30724]                                         #
+#                                      jose.avilalopez@ucr.ac.cr                                      #
+#                                                                                                     #
+#######################################################################################################
+                                       *** START OF TEST ***  
+# File      : DatasetGenerator.py
+# Date      : 04-06-2021
+# Start Time: 19:22:25
+
+
+|------------------------------------------------------------------------------------------------------|
+|                                          *** Parameters ***                                          |
+|                                                                                                      |
+| Recording Session Number           : 771                                                             |
+| Interpolation Method               : Slerp                                                           |
+| Synchronization Method             : Upsample Angles                                                 |
+| Number of Recorded Channels        : 99                                                              |
+| Sampling Rate to Use               : 1250 Hz                                                         |
+| Window Size                        : 125                                                             |
+| Batch size (# of windows)          : 32                                                              |
+| LFP Signal channel to use          : 70                                                              |
+| Shuffle buffer size                : 1000                                                            |
+| Round angles to get discrete label : False                                                           |
+|------------------------------------------------------------------------------------------------------|
+
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 1                                                 |
+| Importing LFP data from session: 771                                                                 |
+|------------------------------------------------------------------------------------------------------|
+Loading LFP Data of 99 channels from: ec014.771.eeg.
+LFP Data shape: (3433472, 99)
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 2                                                 |
+| Importing angles data from session: 771                                                              |
+|------------------------------------------------------------------------------------------------------|
+Loading the animal position data from: ec014.771.whl.
+Head angle data shape: (107297,)
+Head angle invalid data: 25545 (23.81%)
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 3                                                 |
+| Upsample Angles data to reach a higher sampling rate                                                 |
+|------------------------------------------------------------------------------------------------------|
+Expanding angles data with 'NaN' values to match the new sampling rate: 1250Hz. Original was: 39.06Hz.
+Angles data upsampled shape: (3433472,)
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 4                                                 |
+| Label data by concatenating LFPs and interpolated Angles in a single 2D-array.                       |
+|------------------------------------------------------------------------------------------------------|
+Adding labels to the data by concatenating the [3433472 x 99] LFP data matrix with the [3433472] Angles vector.
+Rounding Labels = False
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 5                                                 |
+| Clean the labeled dataset from discontinuities in positional data (angles).                          |
+|------------------------------------------------------------------------------------------------------|
+Amount of invalid indexes: 25544
+Amount of invalid indexes + associated expanded indexes: 817408
+Number of valid samples: 2616064 (including the 31 NaN values padded for the last real positional data.)
+Total number of valid subsets: 24
+Total number of samples and channels + angles in subsets 0: (456481, 100)
+Total number of samples and channels + angles in subsets 1: (801, 100)
+Total number of samples and channels + angles in subsets 2: (641, 100)
+Total number of samples and channels + angles in subsets 3: (92001, 100)
+Total number of samples and channels + angles in subsets 4: (240545, 100)
+Total number of samples and channels + angles in subsets 5: (311745, 100)
+Total number of samples and channels + angles in subsets 6: (136417, 100)
+Total number of samples and channels + angles in subsets 7: (311073, 100)
+Total number of samples and channels + angles in subsets 8: (212513, 100)
+Total number of samples and channels + angles in subsets 9: (227105, 100)
+Total number of samples and channels + angles in subsets 10: (8833, 100)
+Total number of samples and channels + angles in subsets 11: (374113, 100)
+Total number of samples and channels + angles in subsets 12: (2689, 100)
+Total number of samples and channels + angles in subsets 13: (56929, 100)
+Total number of samples and channels + angles in subsets 14: (9441, 100)
+Total number of samples and channels + angles in subsets 15: (37665, 100)
+Total number of samples and channels + angles in subsets 16: (52321, 100)
+Total number of samples and channels + angles in subsets 17: (1185, 100)
+Total number of samples and channels + angles in subsets 18: (737, 100)
+Total number of samples and channels + angles in subsets 19: (16801, 100)
+Total number of samples and channels + angles in subsets 20: (63361, 100)
+Total number of samples and channels + angles in subsets 21: (833, 100)
+Total number of samples and channels + angles in subsets 22: (225, 100)
+Total number of samples and channels + angles in subsets 23: (833, 100)
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 6                                                 |
+| Interpolate angles data using a SLERP approach.                                                      |
+|------------------------------------------------------------------------------------------------------|
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+Interpolate angles data using SLERP method.
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 7                                                 |
+| Plotting Angles and one channel of the LFPs after cleaning and interpolation.                        |
+|------------------------------------------------------------------------------------------------------|
+Plotting Angles data [°] at 1250Hz
+Plotting LFP Channel 70 at 1250Hz
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 8                                                 |
+| Get Preferred angle.                                                                                 |
+|------------------------------------------------------------------------------------------------------|
+ Preferred angle according to LFP Channel 70: 266°
+Plotting Preferred angle according to LFP Channel 70
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 9                                                 |
+| Get largest subset of data.                                                                          |
+|------------------------------------------------------------------------------------------------------|
+Sahpe of the largest subset of data : [456481,100]
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 10                                                |
+|------------------------------------------------------------------------------------------------------|
+Training data shape: [319536,100]
+Validation data shape: [91296,100]
+Test data shape: [45649,100]
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 11                                                |
+| Save the dataset to pickle file: S-771_I-SLERP_F-1250_W-100ms.pickle.                                |
+|------------------------------------------------------------------------------------------------------|
+
+|------------------------------------------------------------------------------------------------------|
+|                                               Step 12                                                |
+| Convert data to windowed series.                                                                     |
+|------------------------------------------------------------------------------------------------------|
+Inputs shape (batch, samples): (32, 125, 1)
+Labels shape (batch, labels): (32, 1, 1)
+
+#######################################################################################################
+                                       *** END OF TEST ***  
+# Test Duration : 00:0:33
+# Finish Time   : 19:22:58
+#######################################################################################################

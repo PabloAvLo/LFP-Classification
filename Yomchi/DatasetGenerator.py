@@ -34,7 +34,7 @@ import pickle
 # <li> Specify data properties parameters.
 # </ul>
 # <ol>
-Env.init_environment(True, True)
+Env.init_environment(True)
 
 tf.keras.backend.clear_session()
 tf.random.set_seed(51)
@@ -252,8 +252,8 @@ test_data = data.channels_to_windows(test_array, lfp_channel, window_size, batch
 
 # TODO: The shape should be (batch, time, features) to be compatible with what tensorflow expects as default.
 for example_inputs, example_labels in train_data.take(1):
-  Env.print_text(f'Inputs shape (batch, samples): {example_inputs.shape}')
-  Env.print_text(f'Labels shape (batch, labels): {example_labels.shape}')
+  Env.print_text(f'Inputs shape (batch, time, samples): {example_inputs.shape}')
+  Env.print_text(f'Labels shape (batch, time, labels): {example_labels.shape}')
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>
