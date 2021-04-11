@@ -34,7 +34,7 @@ def MLP(layers, units_per_layer, dropout=None):
     Env.print_text(f"Creating a dense feed-forward Neural Network model with {layers} layers, using {units_per_layer} "
                    f"units per layer. \nThe activation function in the hidden layers is 'ReLu' and the output layer "
                    f"has only 1 unit (the predicted angle).")
-    model = tf.keras.models.Sequential()
+    model = tf.keras.Sequential()
 
     # First layer (need to specify the input size)
     model.add(tf.keras.layers.Dense(

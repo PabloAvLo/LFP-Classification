@@ -42,3 +42,18 @@ def store_figure(fig_name, show=False):
     if show:
         plt.show()
     plt.close(fig_name)
+
+
+def plot_predictions(actual_data, predictions, max_subplots=3):
+    angles = actual_data[:, 1]
+    plt.figure(figsize=(12, 8))
+    max_n = min(max_subplots, len(angles))
+    for n in range(max_n):
+        plt.subplot(max_n, 1, n + 1)
+        plt.ylabel('Angles')
+
+        plt.scatter(angles[n, :, 0], edgecolors='k', label='angles', c='#2ca02c', s=64)
+        plt.scatter(predictions[n, :, 0], mmarker='X', edgecolors='k', label='Predictions', c='#ff7f0e', s=64)
+
+        if n == 0:
+            plt.legend()

@@ -12,9 +12,10 @@
 @details Properly loads the input data and labels and prepare a clean dataset.
 """
 
-import Yomchi.Environment as Env
-import Yomchi.preprocessing as data
-import Yomchi.visualization as ui
+from Yomchi import \
+    Environment as Env, \
+    preprocessing as data, \
+    visualization as ui
 
 import matplotlib.pyplot as plt
 import numpy as np
