@@ -38,6 +38,7 @@ import time
 Env.init_environment(True, enable_debug=True)
 
 tf.keras.backend.clear_session()
+tf.keras.backend.set_floatx('float64')
 tf.random.set_seed(51)
 np.random.seed(51)
 
@@ -47,11 +48,11 @@ interpolation = "SLERP"  # or "linear", "quadratic", "cubic", "nearest", "SLERP"
 rate_used = data.LFP_DATAMAX_SAMPLING_RATE  # or data.POSITION_DATA_SAMPLING_RATE
 
 # Windowing properties
-window_size = 125  # Equals to 100ms at 1250Hz. Recommended between 100ms to 200ms
+window_size = 1250  # Equals to 100ms at 1250Hz. Recommended between 100ms to 200ms
 batch_size = 32
 shuffle_buffer = 1000
 lfp_channel = 70
-batches_to_plot = 2
+batches_to_plot = 5
 
 # Input pickle file.
 i_pickle_file_name = f"S-{session}_I-{interpolation}_F-{rate_used}_W-{int(window_size*1e3/rate_used)}ms.pickle"
@@ -62,7 +63,7 @@ parameters_dictionary = {"Recording Session Number": str(session),
                         "Window Size": window_size,
                         "Batch size (# of windows)": batch_size,
                         "LFP Signal channel to use": lfp_channel,
-                        "Shuffle buffer size": shuffle_buffer,
+                        "Shuffle buffer size": str(shuffle_buffer),
                         "Pickle file used": i_pickle_file_name,
                         "Batches to Plot": batches_to_plot}
 
@@ -84,15 +85,16 @@ with open(f"{data.PATH_TO_DATASETS}Pickles/{i_pickle_file_name}", "rb") as f:
 # </ul>
 Env.step("Convert data to windowed series.")
 
+# The train data is shuffled so the network is trained with a variety of examples.
 train_data = data.channels_to_windows(train_array, lfp_channel, window_size, batch_size, shuffle_buffer)
-val_data = data.channels_to_windows(valid_array, lfp_channel, window_size, batch_size, shuffle_buffer)
-test_data = data.channels_to_windows(test_array, lfp_channel, window_size, batch_size, shuffle_buffer)
+
+# The validation and testing data are not shuffled because the intention is to predict the series in order.
+val_data = data.channels_to_windows(valid_array, lfp_channel, window_size, batch_size)
+test_data = data.channels_to_windows(test_array, lfp_channel, window_size, batch_size)
 
 for example_inputs, example_labels in train_data.take(1):
   Env.print_text(f'Inputs shape (batch, time, channels): {example_inputs.shape}')
   Env.print_text(f'Labels shape (batch, time, labels): {example_labels.shape}')
-
-# BUG: The model is being fed for training and prediction wrongly.
 
 ## <li> Step 3
 # <ul>
@@ -101,13 +103,19 @@ for example_inputs, example_labels in train_data.take(1):
 Env.step("Create model: Multi Layer Perceptron (MLP)")
 
 # Parameters
-units_per_layer = 64
+units_per_layer = 32
 dropout = None
 # dropout = 0.60
 layers = 3
 epochs = 1
 
-model = models.MLP(layers, units_per_layer, dropout)
+# model = models.MLP(layers, units_per_layer, dropout)
+model = models.LSTM(units_per_layer)
+# model = models.CNN(window_size, units_per_layer)
+
+for example_inputs, example_labels in train_data.take(1):
+  Env.print_text(f'Input shape: {example_inputs.shape}')
+  Env.print_text(f'Output shape: {model(example_inputs).shape}')
 
 ## <li> Step 4
 # <ul>
@@ -124,15 +132,14 @@ history = models.compile_and_fit(model, train_data, val_data, epochs=epochs)
 # </ul>
 Env.step(f"Plotting the original angular data vs the predictions of {batches_to_plot} batches")
 
-# Getting original data
 real = []
+pred = []
 for inputs, label in test_data.take(batches_to_plot):
+    # Getting original data
     real = np.append(real, label[:, 0, 0].numpy())
 
-# Getting predicted data
-predictions = model.predict(test_data)
-Env.print_text(f'Predictions shape: {predictions.shape}')
-pred = predictions[0, 0:64, 0]
+    # Getting predicted data
+    pred = np.append(pred, model.predict(inputs))
 
 # Plotting
 figname = "predictions"
@@ -147,5 +154,5 @@ ui.store_figure(figname, show=Env.debug)
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>
-#Env.finish_test()
-Env.finish_test(f"M-MLP_S-{session}_I-{interpolation}_F-{rate_used}")
+Env.finish_test()
+# Env.finish_test(f"M-MLP_S-{session}_I-{interpolation}_F-{rate_used}")

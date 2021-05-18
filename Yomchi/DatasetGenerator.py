@@ -54,7 +54,7 @@ if sync_method == "Upsample Angles":
     rate_used = data.LFP_DATAMAX_SAMPLING_RATE
 
 # Windowing properties
-window_size = 125  # Equals to 100ms at 1250Hz. Recommended between 100ms to 200ms
+window_size = 1250  # Equals to 100ms at 1250Hz. Recommended between 100ms to 200ms
 batch_size = 32
 shuffle_buffer = 1000
 lfp_channel = 70

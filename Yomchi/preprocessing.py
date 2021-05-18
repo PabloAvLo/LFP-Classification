@@ -364,13 +364,13 @@ def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer
     # Make each window a numpy array row.
     windowed_data = windowed_data.flat_map(lambda window: window.batch(window_size))
 
-    if Env.debug:
-        print(f"Channel {channel} Data:")
-        for window in windowed_data.take(1):
-            print(window.numpy())
-
     # Add labels to the data
     windowed_ds = tf.data.Dataset.zip((windowed_data, labels_ds))
+
+    if Env.debug:
+        for x, y in windowed_ds.take(1):
+            print("x = ", x.numpy())
+            print("y = ", y.numpy())
 
     if shuffle_buffer != None:
         # Shuffle the data in groups of shuffle_buffer to accelerate. Instead of shuffle it all at once.
@@ -378,11 +378,6 @@ def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer
 
     # Batch the data into sets of 'batch_size'.
     windowed_ds = windowed_ds.batch(batch_size).prefetch(1)
-
-    if Env.debug:
-        for x, y in windowed_ds.take(1):
-            print("x = ", x.numpy())
-            print("y = ", y.numpy())
 
     return windowed_ds
 
