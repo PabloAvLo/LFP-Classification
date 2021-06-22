@@ -35,7 +35,7 @@ import pickle
 # <li> Specify data properties parameters.
 # </ul>
 # <ol>
-Env.init_environment(True)
+Env.init_environment(True, True)
 
 tf.keras.backend.clear_session()
 tf.random.set_seed(51)
@@ -57,7 +57,7 @@ if sync_method == "Upsample Angles":
 window_size = 1250  # Equals to 100ms at 1250Hz. Recommended between 100ms to 200ms
 batch_size = 32
 shuffle_buffer = 1000
-lfp_channel = 70
+lfp_channel = 40
 round_angles = False
 base_angle = 0  # Unused if round_angles = False
 offset_between_angles = 30  # Unused if round_angles = False
@@ -67,7 +67,8 @@ if round_angles:
     extra.update({"Angle labels starting from": str(base_angle) + "°",
                   "until 360° in steps of": str(offset_between_angles) + "°"})
 
-o_pickle_file_name = f"S-{session}_I-{interpolation}_F-{rate_used}_W-{int(window_size*1e3/rate_used)}ms.pickle"
+o_pickle_file_name = f"S-{session}_C{lfp_channel}_I-{interpolation}_F-{rate_used}_W-{int(window_size*1e3/rate_used)}" \
+                     f"ms.pickle"
 
 parameters_dictionary = {"Recording Session Number": str(session),
                       "Interpolation Method": interpolation.title(),

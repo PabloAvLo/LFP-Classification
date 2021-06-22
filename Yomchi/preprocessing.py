@@ -73,6 +73,8 @@ def load_angles_data(file=ANGLES[771], degrees=True):
     positions_file.close()
 
     positions[positions == -1] = np.NAN
+    #TODO: of x_2 - x_1 = 0, angles should be NaN.
+
     angles = np.arctan2((np.subtract(positions[:, 3], positions[:, 1])),
                         (np.subtract(positions[:, 2], positions[:, 0])))
 
@@ -88,6 +90,7 @@ def load_angles_data(file=ANGLES[771], degrees=True):
 
     return angles
 
+#TODO: Remove unused orig_rate and new_rate parameters.
 def downsample_lfps(lfp_data, orig_rate, new_rate):
     """
     Downsample the LFP signal data after applying an anti-aliasing filter.
@@ -250,65 +253,67 @@ def add_labels(lfps, angles, round_labels, start=0, offset=30):
     return labeled_data
 
 
-def clean_invalid_positional(labeled_dataset, is_dataframe=False):
+def clean_invalid_positional(labeled_dataset, is_padded=True):
     """
-    Clean the data rows which have '-1' values as labels (angles) from the the data and their LFPs associated in each channel.
-    @details The positional data taken from the LEDs placed in the rat have discontinuities where the one or both LEDs
+    Clean the data rows which have '-1' values as labels (angles) from the the data and their LFPs associated in each
+    channel. Plus the following 31 rows with NaN as angle value in case of padded data.
+    @details The positional data taken from the LEDs placed in the rat have discontinuities where one or both LEDs
     are lost, making them invalid.
     Hence '-1' values are used instead to denote invalid position data and are meant to be removed from the data since
     they are not representative labels.
     @param labeled_dataset: Matrix [n x (numChannels +1)] with the LFP signals used as the preliminary features of the
     data and the angles data extracted from the positions used as the labels of the data.
-    @param is_dataframe: If set, manage the input labeled dataset as a Pandas Dataframe, or a Numpy array otherwise.
+    @param is_padded: If True, manage the input labeled dataset as a padded array of angles, or a downsampled LFP set
+     otherwise.
     @return clean_dataset: Input data without invalid positional values.
     """
-
-    if is_dataframe:
-        clean_dataset = labeled_dataset[labeled_dataset["Angles"] != -1]
-    else:
-
+    if is_padded:
         # Get the indexes of all invalid values (-1) plus the 31 following padded values (NaN).
         # and save that range as an element of 'invalid_indexes' array.
-        invalid_indexes = [np.arange(i, i+32).tolist() for i, v in enumerate(labeled_dataset) if v[-1] == -1]
-        Env.print_text(f"Amount of invalid indexes: {len(invalid_indexes)}")
+        invalid_indexes = [np.arange(i, i + 32).tolist() for i, v in enumerate(labeled_dataset) if v[-1] == -1]
+    else:
+        # Get the indexes of all invalid values (-1) and save that range as an element of 'invalid_indexes' array.
+        invalid_indexes = [i for i, v in enumerate(labeled_dataset) if v[-1] == -1]
 
-        # Merge all sublists as a single consecutive array of invalid indexes.
-        invalid_indexes = [item for sublist in invalid_indexes for item in sublist]
-        Env.print_text(f"Amount of invalid indexes + associated expanded indexes: {len(invalid_indexes)}")
-        Env.print_text(f"Number of valid samples: {len(labeled_dataset) - len(invalid_indexes)} (including the 31 NaN "
-                       f"values padded for the last real positional data.)")
+    Env.print_text(f"Amount of invalid indexes: {len(invalid_indexes)}")
 
-        # Get the indexes where the discontinuities start and end.
-        discontinuities_starts = [invalid_indexes[0]]
-        discontinuities_ends = []
-        for i in range(1, len(invalid_indexes)):
-            if invalid_indexes[i] - 1 != invalid_indexes[i-1]:
-                discontinuities_starts.append(invalid_indexes[i])
-                discontinuities_ends.append(invalid_indexes[i-1])
-        discontinuities_ends.append(invalid_indexes[-1])
+    # Merge all sublists as a single consecutive array of invalid indexes.
+    invalid_indexes = [item for sublist in invalid_indexes for item in sublist]
+    Env.print_text(f"Amount of invalid indexes + associated expanded indexes: {len(invalid_indexes)}")
+    Env.print_text(f"Number of valid samples: {len(labeled_dataset) - len(invalid_indexes)} (including the 31 NaN "
+                   f"values padded for the last real positional data.)")
 
-        # Stores sub-arrays of valid indexes:
-        clean_datasets = []
+    # Get the indexes where the discontinuities start and end.
+    discontinuities_starts = [invalid_indexes[0]]
+    discontinuities_ends = []
+    for i in range(1, len(invalid_indexes)):
+        if invalid_indexes[i] - 1 != invalid_indexes[i-1]:
+            discontinuities_starts.append(invalid_indexes[i])
+            discontinuities_ends.append(invalid_indexes[i-1])
+    discontinuities_ends.append(invalid_indexes[-1])
 
-        # From the first item to the start of the first discontinuity
-        if discontinuities_starts[0] != 0:
-            clean_datasets.append(labeled_dataset[0:discontinuities_starts[0], :])
+    # Stores sub-arrays of valid indexes:
+    clean_datasets = []
 
-        # From the end+1 of the ith discontinuity to the start (not included) of the ith + 1 discontinuity
-        for i in range(len(discontinuities_starts)-1):
-            clean_datasets.append(labeled_dataset[discontinuities_ends[i]+1:discontinuities_starts[i+1], :])
+    # From the first item to the start of the first discontinuity
+    if discontinuities_starts[0] != 0:
+        clean_datasets.append(labeled_dataset[0:discontinuities_starts[0], :])
 
-        # From the end of the last discontinuity to the last item.
-        if discontinuities_ends[-1] != len(labeled_dataset)-1:
-            clean_datasets.append(labeled_dataset[discontinuities_ends[-1] + 1:-1, :])
+    # From the end+1 of the ith discontinuity to the start (not included) of the ith + 1 discontinuity
+    for i in range(len(discontinuities_starts)-1):
+        clean_datasets.append(labeled_dataset[discontinuities_ends[i]+1:discontinuities_starts[i+1], :])
 
-        # Delete subsets with only 1 valid sample (i.e its lenght is <=32)
-        # From the resulting subsets, delete the last 31 rows with NaN angles
-        clean_datasets = [v[:-31, :] for v in clean_datasets if len(v) > 32]
+    # From the end of the last discontinuity to the last item.
+    if discontinuities_ends[-1] != len(labeled_dataset)-1:
+        clean_datasets.append(labeled_dataset[discontinuities_ends[-1] + 1:-1, :])
 
-        Env.print_text(f"Total number of valid subsets: {len(clean_datasets)}")
-        for s in range(0, len(clean_datasets)):
-            Env.print_text(f"Total number of samples and channels + angles in subsets {s}: {clean_datasets[s].shape}")
+    # Delete subsets with only 1 valid sample (i.e its length is <=32)
+    # From the resulting subsets, delete the last 31 rows with NaN angles
+    clean_datasets = [v[:-31, :] for v in clean_datasets if len(v) > 32]
+
+    Env.print_text(f"Total number of valid subsets: {len(clean_datasets)}")
+    for s in range(0, len(clean_datasets)):
+        Env.print_text(f"Total number of samples and channels + angles in subsets {s}: {clean_datasets[s].shape}")
 
     return clean_datasets
 
