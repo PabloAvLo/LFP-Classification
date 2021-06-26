@@ -44,7 +44,7 @@ np.random.seed(51)
 # Session and methods Parameters
 # The recording session 771 has a 23.81% of invalid positions, while the session 765 has only 6.98%
 session = 771  # or 765
-interpolation = "SLERP"  # "linear" "quadratic" "cubic" "nearest" "SLERP"
+interpolation = "Shortest"  # "linear" "quadratic" "cubic" "nearest" "Shortest"
 sync_method = "Upsample Angles"  # "Upsample Angles" "Downsample LFPs"
 
 # Data Properties

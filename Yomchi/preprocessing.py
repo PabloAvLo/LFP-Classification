@@ -141,12 +141,12 @@ def angles_expansion(angles_data, orig_rate, new_rate):
     return upsampled_data
 
 
-def slerp(start, end, amount):
+def shortest_angle_interpolation(start, end, amount):
     """
-    Spherical Linear Interpolation: This is equivalent to the linear interpolation, applied in a sphere.
-    It considers the 'start' and 'end' as angles in a circumference where the objective is to find the smallest arch.
-    param start: Start angle with values from 0 to 359
-    param end: Final angle with values from 0 to 359
+    This interpolation method considers the 'start' and 'end' as angles in a circumference where the objective is to
+    find the smallest arch between two angles.
+    param start: Start angle with values in the range of [0 to 360[
+    param end: Final angle with values in the range of [0 to 360[
     param amount: Value between [0, 1] which determines how close the interpolated angle will be placed from the Start
     angle (0) or from the Final angle (1), being 0.5 the middle.
     return interpolated_angle: Interpolated angle between 'start' and 'end'.
@@ -156,12 +156,12 @@ def slerp(start, end, amount):
     return interpolated_angle
 
 
-def vectorized_slerp(angles_data):
+def vectorized_sai(angles_data):
     """
     Replace 'NaN' values between valid values (interpolation) in angular data with an interpolated value using
-    Spherical Linear Interpolation (SLERP).
+    the shortest angle interpolation.
     param angles_data: Array with the angles data extracted from the animal positions.
-    return interpolated_angles: Array with the angles data interpolated using SLERP
+    return interpolated_angles: Array with the angles data interpolated using the Shortest Angle Interpolation
     """
     start_angle = np.nan
     no_nans = 0
@@ -186,19 +186,13 @@ def vectorized_slerp(angles_data):
                 end_angle = interpolated_angles[i]
                 for j in range(first_nan_index, first_nan_index + no_nans):
                     amount += 1/(no_nans + 1)
-                    interpolated_angles[j] = slerp(start_angle, end_angle, amount)
+                    interpolated_angles[j] = shortest_angle_interpolation(start_angle, end_angle, amount)
                 start_angle = np.nan
-
-    # valid_angles = [index for index, v in enumerate(angles_data) if ~np.isnan(v)]
-    # starts = valid_angles[:-1]
-    # ends = valid_angles[1:]
-    #
-    # interpolated_angles_new = [slerp(starts[a], ends[a], (a+1) * 1/(ends[a] - starts[a] + 1)) for a in range(len(starts))]
 
     return interpolated_angles
 
 
-def interpolate_angles(angles_data, method="linear"):
+def interpolate_angles(angles_data, method="Shortest"):
     """
     Replace 'NaN' values in angular data with an interpolated value using a given method.
     @param angles_data: Array with the angles data extracted from the animal positions.
@@ -208,8 +202,8 @@ def interpolate_angles(angles_data, method="linear"):
     """
     Env.print_text("Interpolate angles data using " + method + " method.")
 
-    if method == "SLERP":
-        interpolated_angles = vectorized_slerp(angles_data)
+    if method == "Shortest":
+        interpolated_angles = vectorized_sai(angles_data)
 
     else:
         angles_series = pd.Series(angles_data)
@@ -271,17 +265,18 @@ def clean_invalid_positional(labeled_dataset, is_padded=True):
         # Get the indexes of all invalid values (-1) plus the 31 following padded values (NaN).
         # and save that range as an element of 'invalid_indexes' array.
         invalid_indexes = [np.arange(i, i + 32).tolist() for i, v in enumerate(labeled_dataset) if v[-1] == -1]
+        Env.print_text(f"Amount of invalid indexes: {len(invalid_indexes)}")
+
+        # Merge all sublists as a single consecutive array of invalid indexes.
+        invalid_indexes = [item for sublist in invalid_indexes for item in sublist]
+        Env.print_text(f"Amount of invalid indexes + associated expanded indexes: {len(invalid_indexes)}")
+        Env.print_text(f"Number of valid samples: {len(labeled_dataset) - len(invalid_indexes)} (including the 31 NaN "
+                       f"values padded for the last real positional data.)")
     else:
         # Get the indexes of all invalid values (-1) and save that range as an element of 'invalid_indexes' array.
         invalid_indexes = [i for i, v in enumerate(labeled_dataset) if v[-1] == -1]
-
-    Env.print_text(f"Amount of invalid indexes: {len(invalid_indexes)}")
-
-    # Merge all sublists as a single consecutive array of invalid indexes.
-    invalid_indexes = [item for sublist in invalid_indexes for item in sublist]
-    Env.print_text(f"Amount of invalid indexes + associated expanded indexes: {len(invalid_indexes)}")
-    Env.print_text(f"Number of valid samples: {len(labeled_dataset) - len(invalid_indexes)} (including the 31 NaN "
-                   f"values padded for the last real positional data.)")
+        Env.print_text(f"Amount of invalid indexes: {len(invalid_indexes)}")
+        Env.print_text(f"Number of valid samples: {len(labeled_dataset) - len(invalid_indexes)}")
 
     # Get the indexes where the discontinuities start and end.
     discontinuities_starts = [invalid_indexes[0]]

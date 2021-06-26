@@ -44,7 +44,7 @@ np.random.seed(51)
 
 # Session, data and methods Parameters
 session = 771  # 765 or 771
-interpolation = "SLERP"  # or "linear", "quadratic", "cubic", "nearest", "SLERP"
+interpolation = "Shortest"  # or "linear", "quadratic", "cubic", "nearest", "Shortest"
 rate_used = data.LFP_DATAMAX_SAMPLING_RATE  # or data.POSITION_DATA_SAMPLING_RATE
 
 # Windowing properties

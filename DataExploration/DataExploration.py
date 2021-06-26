@@ -46,7 +46,7 @@ PLOT = True
 # Session and methods Parameters
 session = 771  # or 765
 
-interpolation = "SLERP"  # "linear" "quadratic" "cubic" "nearest" "SLERP"
+interpolation = "Shortest"  # "linear" "quadratic" "cubic" "nearest" "Shortest"
 sync_method = "Upsample Angles"  # "Upsample Angles" "Downsample LFPs"
 
 # Data Properties
@@ -221,16 +221,12 @@ if str(session) == "771" and sync_method == "Downsample LFPs":
 
 ## <li> Step 6
 # <ul>
-# <li> Convert labeled dataset to a dataframe.
-# <li> Clean both, the labeled dataset and dataframe from NaN values at the boundaries.
+# <li> Clean the labeled dataset from invalid values.
 # <li> Print Bar plot for labeled angles.
 # </ul>
-Env.step("Clean the labeled dataset from NaN values at the boundaries.")
+Env.step("Clean the labeled dataset from invalid values.")
 
-dataframe = data.ndarray_to_dataframe(labeled_data, rate_used)
-
-clean_frame = data.clean_unsync_boundaries(dataframe)
-clean_dataset = data.clean_unsync_boundaries(labeled_data, False)
+clean_dataset = data.clean_invalid_positional(labeled_data, sync_method == "Upsample Angles")
 
 if round_angles:
     labels = np.arange(base_angle, 360, offset_between_angles)
@@ -276,9 +272,7 @@ Env.print_text("Number of NaNs in Labeled Dataset with interpolated Angles Data:
 Env.print_text("Number of NaNs at the beginning of the interpolated Angles Data: " + str(nans_begin))
 Env.print_text("Number of NaNs at the end of the interpolated Angles Data: " + str(nans_end))
 Env.print_text("Number of NaNs in Labeled and Clean Dataset with interpolated Angles Data: "
-               + str(np.count_nonzero(np.isnan(clean_dataset))))
-Env.print_text("Number of NaNs in Labeled and Clean DataFRAME with interpolated Angles Data: "
-               + str(np.count_nonzero(np.isnan(clean_frame))))
+               + str(np.count_nonzero(np.isnan(clean_dataset[0][:, -1]))))
 
 if PLOT:
     ## <li> Step 8
@@ -290,10 +284,10 @@ if PLOT:
     figname = str(session) + "_LFP_C0_clean_and_angles_" + interpolation + "_" + str(rate_used) + "Hz"
     plt.figure(figname)
     plt.subplot(211)
-    plt.plot(labeled_data[:-1, 0], "xr")
+    plt.plot(clean_dataset[0][:, 0], "xr")
     plt.title("Señal LFP del Canal 0 limpia. Muestreada a " + str(rate_used) + "Hz. Sesión: " + str(session))
     plt.subplot(212)
-    plt.plot(labeled_data[:, -1], "xb")
+    plt.plot(clean_dataset[0][:, -1], "xb")
     plt.title("Información de ángulos [°] limpia. Sesión: " + str(session) + ".\n Interpolada con: "
               + interpolation + " a " + str(rate_used) + "Hz")
     ui.store_figure(figname, True)
@@ -306,7 +300,7 @@ if PLOT:
 
     figname = str(session) + "_BoxPLot0-49_" + interpolation + "_" + str(rate_used) + "Hz"
     plt.figure(figname, figsize=[12, 16])
-    sns.boxplot(data=clean_frame.iloc[:, 0:50], orient="h")
+    sns.boxplot(data=clean_dataset[0][:, 0:50], orient="h")
     plt.ylabel("Canales")
     plt.xlabel("Voltaje")
     plt.title("Diagrama de caja de los canales 0-49.\nSesión: " + str(session) + ". Interpolada con: "
@@ -315,7 +309,7 @@ if PLOT:
 
     figname = str(session) + "_BoxPLot50-98_" + interpolation + "_" + str(rate_used) + "Hz"
     plt.figure(figname, figsize=[12, 16])
-    sns.boxplot(data=clean_frame.iloc[:, 50:99], orient="h")
+    sns.boxplot(data=clean_dataset[0][:, 50:99], orient="h")
     plt.ylabel("Canales")
     plt.xlabel("Voltaje")
     plt.title("Diagrama de caja de los canales 50-98.\nSesión: " + str(session) + ". Interpolada con: "
@@ -334,7 +328,7 @@ if PLOT:
 
     figname = str(session) + "_BoxPLotAngles_" + interpolation + "_" + str(rate_used) + "Hz"
     plt.figure(figname)
-    sns.boxplot(x=clean_frame["Angle"])
+    sns.boxplot(x=clean_dataset[0][:, -1])
     plt.ylabel("Muestras")
     plt.xlabel("Ángulos")
     plt.title("Diagrama de caja de los ángulos.\nSesión: " + str(session) + ". Interpolada con: "
@@ -350,12 +344,12 @@ if PLOT:
     ui.store_figure(figname, True, True)
     """
 
-## <li> Step 11
-    # <ul>
-    # <li> Convert data to windowed series.
-    # </ul>
-Env.step("Convert data to windowed series.", 11)
-windowed_data = data.channels_to_windows(clean_dataset, lfp_channel, window_size, batch_size, shuffle_buffer)
+# ## <li> Step 11
+#     # <ul>
+#     # <li> Convert data to windowed series.
+#     # </ul>
+# Env.step("Convert data to windowed series.", 11)
+# windowed_data = data.channels_to_windows(clean_dataset, lfp_channel, window_size, batch_size, shuffle_buffer)
 
 # </ol>
 ## <h2> Finish Test and Exit </h2>
