@@ -69,7 +69,7 @@ pip3 install <package>==<version>
  
 ## Documentation 
  - You can start reading the documentation in the web veiw here [LFP-Classification-Documentation-Page](https://pabloavlo.github.io/LFP-Classification/html/index.html).
- - or as pdf here [LFP-Classification-Documentation-PDF](https://github.com/PabloAvLo/LFP-Classification/tree/master/docs/LibraryDocumentation.pdf).
+ - To read it as PDF run ```make``` under *docs/* and open the generated *latex/refman.pdf* file. 
 
 ## Author
 **Pablo Avila** - [PabloAvLo](https://github.com/PabloAvLo)

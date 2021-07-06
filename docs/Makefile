@@ -34,4 +34,4 @@ back:
 view:
 	evince $(LatexFolder)/$(Target)
 clean:
-	rm -rf \latex \html *.ps *.dvi *.aux *.toc *.idx *.ind *.ilg *.log *.out *.brf *.blg *.bbl $(Target) 
+	rm -rf \latex *.ps *.dvi *.aux *.toc *.idx *.ind *.ilg *.log *.out *.brf *.blg *.bbl $(Target) 
