@@ -25,7 +25,7 @@ import tensorflow as tf
 def dataExploration():
     """
     @details
-    <h1> Dataset Generator:</h1>
+    <h1> Data Exploration:</h1>
     <h2> Setup </h2>
     <ul>
         <li> Initialize Environment.
