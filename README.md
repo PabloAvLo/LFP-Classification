@@ -67,8 +67,9 @@ To download an specific version:
 pip3 install <package>==<version>
 ```
  
-## Usage
-
+## Documentation 
+ - You can start reading the documentation in the web veiw here [LFP-Classification-Documentation-Page](https://github.com/PabloAvLo/LFP-Classification/tree/master/Documentation/html/index.html).
+ - or as pdf here [LFP-Classification-Documentation-PDF](https://github.com/PabloAvLo/LFP-Classification/tree/master/Documentation/LibraryDocumentation.pdf).
 
 ## Author
 **Pablo Avila** - [PabloAvLo](https://github.com/PabloAvLo)

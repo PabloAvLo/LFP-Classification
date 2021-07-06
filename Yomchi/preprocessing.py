@@ -8,7 +8,7 @@
 @file preprocessing.py
 @author Pablo Avila [B30724] jose.avilalopez@ucr.ac.cr
 @copyright MIT License
-@date May, 2020
+@date July, 2021
 @details This module contains a set of functions to import clean, parse and reshape input data.
 """
 
@@ -90,7 +90,7 @@ def load_angles_data(file=ANGLES[771], degrees=True):
 
     return angles
 
-#TODO: Remove unused orig_rate and new_rate parameters.
+
 def downsample_lfps(lfp_data, orig_rate, new_rate):
     """
     Downsample the LFP signal data after applying an anti-aliasing filter.
@@ -115,6 +115,7 @@ def downsample_lfps(lfp_data, orig_rate, new_rate):
     Env.print_text("LFP data decimated shape: " + str(np.shape(resampled_data)))
 
     return resampled_data
+
 
 def angles_expansion(angles_data, orig_rate, new_rate):
     """
@@ -223,6 +224,15 @@ def add_labels(lfps, angles, round_labels, start=0, offset=30):
     @param offset: Offset in [1°, 360°[ between labels starting from 'start' angle.
     @return labeled_data: Matrix with the labeled data [n x lfps[numChannels], angles].
     """
+
+    len_lfps = len(lfps)
+    len_angles = len(angles)
+
+    if len_lfps > len_angles:
+        lfps = lfps[0: len_angles]
+    elif len_lfps < len_angles:
+        angles = angles[0: len_lfps]
+
     Env.print_text("Adding labels to the data by concatenating the [" + str(len(lfps)) + " x " + str(len(lfps[0])) +
                    "] LFP data matrix with the [" + str(len(angles)) + "] Angles vector.")
     Env.print_text("Rounding Labels = " + str(round_labels))
@@ -335,7 +345,7 @@ def ndarray_to_dataframe(dataset, rate):
     return dataframe
 
 
-def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer=None):
+def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer=None, offset=1):
     """
     Receives a numpy array containing the time series of LFP signals of n channels and returns the same data, separated
     in windows.
@@ -344,6 +354,7 @@ def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer
     @param window_size: Size of the windows in which the data are being split.
     @param batch_size: Number of pairs data-labels to group as a batch
     @param shuffle_buffer: Number of windows to shuffle at the same time.
+    @param offset: Number of samples to shift between windows.
     @return windowed_ds: LFP data of the selected channel separated in windows.
     """
 
@@ -359,7 +370,7 @@ def channels_to_windows(series, channel, window_size, batch_size, shuffle_buffer
     windowed_data = tf.data.Dataset.from_tensor_slices(np.expand_dims(data, 1))
 
     # Split the data set in windows shifting each window by 1 and forcing them to the same size (window_size + 1)
-    windowed_data = windowed_data.window(window_size, shift=1, drop_remainder=True)
+    windowed_data = windowed_data.window(window_size, shift=offset, drop_remainder=True)
 
     # Make each window a numpy array row.
     windowed_data = windowed_data.flat_map(lambda window: window.batch(window_size))
