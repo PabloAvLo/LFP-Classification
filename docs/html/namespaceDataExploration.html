@@ -91,18 +91,18 @@ $(document).ready(function(){initNavTree('namespaceDataExploration.html','');});
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a35b406d7a4af7215564bd219422e7847"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDataExploration.html#a35b406d7a4af7215564bd219422e7847">dataExploration</a> ()</td></tr>
-<tr class="separator:a35b406d7a4af7215564bd219422e7847"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e33db6396e97a21d3cdee8263b9be69"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDataExploration.html#a6e33db6396e97a21d3cdee8263b9be69">data_exploration</a> ()</td></tr>
+<tr class="separator:a6e33db6396e97a21d3cdee8263b9be69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a35b406d7a4af7215564bd219422e7847"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35b406d7a4af7215564bd219422e7847">&#9670;&nbsp;</a></span>dataExploration()</h2>
+<a id="a6e33db6396e97a21d3cdee8263b9be69"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e33db6396e97a21d3cdee8263b9be69">&#9670;&nbsp;</a></span>data_exploration()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">def DataExploration.dataExploration </td>
+          <td class="memname">def DataExploration.data_exploration </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -131,6 +131,8 @@ Specify dataset generation parameters. </li>
 Import LFP data. </li>
 <li>
 Plot channels 0 and 97. </li>
+<li>
+Plot the first 10 seconds of LFP data from selected channel at original sampling rate (1250Hz). </li>
 </ul>
 </li>
 <li>
@@ -139,6 +141,8 @@ Plot channels 0 and 97. </li>
 Import angles data. </li>
 <li>
 Plot angles data. </li>
+<li>
+Plot 20 seconds at minute 6 of angles data at original sampling rate (39.06Hz). </li>
 </ul>
 </li>
 <li>
@@ -149,6 +153,8 @@ If the chosen synchronization method is to downsample the LFP data: <ul>
 Downsample LFP data to match Angles sampling rate. </li>
 <li>
 Plot channels 0 and 97 downsampled. </li>
+<li>
+Plot the first 10 seconds of LFP data from selected channel at position's sampling rate (39.06Hz). </li>
 </ul>
 </li>
 <li>
@@ -167,6 +173,8 @@ Plot angles data in the new sampling rate. </li>
 Interpolate angles data using a 'interpolation' approach. </li>
 <li>
 Plot angles data after interpolation. </li>
+<li>
+Plot 20 seconds at minute 6 of angles data at LFP's sampling rate (39.06Hz). Interpolated with the specified method. </li>
 </ul>
 </li>
 <li>
@@ -196,22 +204,22 @@ Print some NaN counts in different dataset stages. </li>
 </ul>
 </li>
 <li>
-<b>Step 8:</b> Plotting clean LFP data from channels 0 and interpolated angles data. </li>
+<b>Step 8:</b> Plot clean LFP data from channels 0 and interpolated angles data. </li>
 <li>
-<b>Step 9:</b> Plotting Boxplot of all channels in two figures, from 0-49 and from 50-98. </li>
+<b>Step 9:</b> Plot Boxplot of all channels in two figures, from 0-49 and from 50-98. </li>
 <li>
 <b>Step 10:</b> <ul>
 <li>
-Plotting Boxplot of interpolated angles. </li>
+Plot Boxplot of interpolated angles. </li>
 <li>
-Plotting Boxplot of interpolated angles vs channel 0 </li>
+Plot Boxplot of interpolated angles vs channel 0 </li>
 </ul>
 </li>
 <li>
 <b>Finish Test and Exit:</b> Save logs, captures and results. </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="DataExploration_8py_source.html#l00094">94</a> of file <a class="el" href="DataExploration_8py_source.html">DataExploration.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DataExploration_8py_source.html#l00100">100</a> of file <a class="el" href="DataExploration_8py_source.html">DataExploration.py</a>.</p>
 
 </div>
 </div>

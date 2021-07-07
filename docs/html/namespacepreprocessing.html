@@ -110,9 +110,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a71eeb84405e114913c2b162f041c7925"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepreprocessing.html#a71eeb84405e114913c2b162f041c7925">vectorized_sai</a> (angles_data)</td></tr>
 <tr class="memdesc:a71eeb84405e114913c2b162f041c7925"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace 'NaN' values between valid values (interpolation) in angular data with an interpolated value using the shortest angle interpolation.  <a href="#a71eeb84405e114913c2b162f041c7925">More...</a><br /></td></tr>
 <tr class="separator:a71eeb84405e114913c2b162f041c7925"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90f23123cf49c54b05e0a7a4107be79f"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepreprocessing.html#a90f23123cf49c54b05e0a7a4107be79f">interpolate_angles</a> (angles_data, method=&quot;Shortest&quot;)</td></tr>
-<tr class="memdesc:a90f23123cf49c54b05e0a7a4107be79f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace 'NaN' values in angular data with an interpolated value using a given method.  <a href="#a90f23123cf49c54b05e0a7a4107be79f">More...</a><br /></td></tr>
-<tr class="separator:a90f23123cf49c54b05e0a7a4107be79f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ab7198f7f92dbfd4a54ad3ebfb4684e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepreprocessing.html#a2ab7198f7f92dbfd4a54ad3ebfb4684e">interpolate_angles</a> (angles_data, method=&quot;Shortest Angle&quot;)</td></tr>
+<tr class="memdesc:a2ab7198f7f92dbfd4a54ad3ebfb4684e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace 'NaN' values in angular data with an interpolated value using a given method.  <a href="#a2ab7198f7f92dbfd4a54ad3ebfb4684e">More...</a><br /></td></tr>
+<tr class="separator:a2ab7198f7f92dbfd4a54ad3ebfb4684e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace10fe078c6971c211a8651fa18c498e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepreprocessing.html#ace10fe078c6971c211a8651fa18c498e">add_labels</a> (lfps, angles, round_labels, start=0, offset=30)</td></tr>
 <tr class="memdesc:ace10fe078c6971c211a8651fa18c498e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add an additional column to the LFP signals matrix with the angular data used as the labels.  <a href="#ace10fe078c6971c211a8651fa18c498e">More...</a><br /></td></tr>
 <tr class="separator:ace10fe078c6971c211a8651fa18c498e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -208,7 +208,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>labeled_data: Matrix with the labeled data [n x lfps[numChannels], angles]. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="preprocessing_8py_source.html#l00235">235</a> of file <a class="el" href="preprocessing_8py_source.html">preprocessing.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="preprocessing_8py_source.html#l00239">239</a> of file <a class="el" href="preprocessing_8py_source.html">preprocessing.py</a>.</p>
 
 </div>
 </div>
@@ -296,7 +296,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>average_angles: Averaged Angles data separated in windows. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="preprocessing_8py_source.html#l00416">416</a> of file <a class="el" href="preprocessing_8py_source.html">preprocessing.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="preprocessing_8py_source.html#l00423">423</a> of file <a class="el" href="preprocessing_8py_source.html">preprocessing.py</a>.</p>
 
 </div>
 </div>
@@ -364,7 +364,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>windowed_ds: LFP data of the selected channel separated in windows. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="preprocessing_8py_source.html#l00371">371</a> of file <a class="el" href="preprocessing_8py_source.html">preprocessing.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="preprocessing_8py_source.html#l00378">378</a> of file <a class="el" href="preprocessing_8py_source.html">preprocessing.py</a>.</p>
 
 </div>
 </div>
@@ -405,7 +405,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>clean_dataset: Input data without invalid positional values. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="preprocessing_8py_source.html#l00283">283</a> of file <a class="el" href="preprocessing_8py_source.html">preprocessing.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="preprocessing_8py_source.html#l00287">287</a> of file <a class="el" href="preprocessing_8py_source.html">preprocessing.py</a>.</p>
 
 </div>
 </div>
@@ -457,8 +457,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a90f23123cf49c54b05e0a7a4107be79f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a90f23123cf49c54b05e0a7a4107be79f">&#9670;&nbsp;</a></span>interpolate_angles()</h2>
+<a id="a2ab7198f7f92dbfd4a54ad3ebfb4684e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ab7198f7f92dbfd4a54ad3ebfb4684e">&#9670;&nbsp;</a></span>interpolate_angles()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -473,7 +473,7 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>method</em> = <code>&quot;Shortest&quot;</code>&#160;</td>
+          <td class="paramname"><em>method</em> = <code>&quot;Shortest&#160;Angle&quot;</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -615,7 +615,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>dataframe: Pandas data frame with Channels 0-99 and Angles as columns names, and the timestamp as indexes calculated as 1/rate * 1e6 to get the time step of the acquisition in microseconds. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="preprocessing_8py_source.html#l00345">345</a> of file <a class="el" href="preprocessing_8py_source.html">preprocessing.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="preprocessing_8py_source.html#l00352">352</a> of file <a class="el" href="preprocessing_8py_source.html">preprocessing.py</a>.</p>
 
 </div>
 </div>

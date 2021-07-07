@@ -63,7 +63,7 @@ def data_set_generator():
     """
 
     # ------- SETUP -------
-    Env.init_environment(True, True)
+    Env.init_environment(True)
 
     tf.keras.backend.clear_session()
     tf.random.set_seed(51)
@@ -129,7 +129,7 @@ def data_set_generator():
         Env.step("Upsample Angles data to reach a higher sampling rate")
         angles_data = data.angles_expansion(angles_data, data.POSITION_DATA_SAMPLING_RATE,
                                             data.LFP_DATAMAX_SAMPLING_RATE)
-        interpolation_ = f".\n Interpolada con: {interpolation}"
+        interpolation_ = f"Interpolados con: {interpolation}"
 
     # ------- STEP 4 -------
     Env.step("Label data by concatenating LFPs and interpolated Angles in a single 2D-array.")
@@ -141,7 +141,7 @@ def data_set_generator():
     # ------- STEP 5 -------
     Env.step("Clean the labeled dataset from discontinuities in positional data (angles).")
 
-    clean_datasets = data.clean_invalid_positional(labeled_data)
+    clean_datasets = data.clean_invalid_positional(labeled_data, is_padded=(sync_method == "Upsample Angles"))
 
     # ------- STEP 6 -------
     Env.step(f"Interpolate angles data using a {interpolation} approach.")
@@ -162,8 +162,8 @@ def data_set_generator():
     Env.print_text(f"Plotting Angles data [°] at {rate_used}Hz")
     figname = f"{session}_Angles_degrees_{int(rate_used)}Hz"
     plt.figure(figname)
-    plt.plot(clean_interpolated_data[4][:, -1], "xr")
-    plt.title(f"Información de ángulos [°]. Sesión: {session} a {rate_used}Hz")
+    plt.plot(clean_interpolated_data[0][0:round(3*60*rate_used), -1], "xr")
+    plt.title(f"3 minutos de Ángulos [°] limpios.\n {interpolation_}. Sesión: {session} a {rate_used}Hz")
     ui.store_figure(figname, show=Env.debug)
 
     Env.print_text(f"Plotting LFPs Channel {lfp_channel} at {rate_used}Hz")
@@ -174,18 +174,17 @@ def data_set_generator():
     plt.title(f"LFPs del Canal {lfp_channel}. Sesión: {session} a {rate_used}Hz")
     ui.store_figure(figname, show=Env.debug)
 
-    Env.step(f"Plot clean LFP data from the chosen channel and interpolated angles data at {rate_used}Hz. [°]")
+    Env.print_text(f"Plot clean LFP data from the chosen channel and interpolated angles data at {rate_used}Hz. [°]")
 
     figname = f"{session}_LFP_C{lfp_channel}_clean_and_angles_{interpolation}_{rate_used}Hz"
-    plt.figure(figname)
-    plt.subplot(211)
-    plt.plot(clean_interpolated_data[0][0:round(5*60*rate_used), lfp_channel], "xr")
-    plt.title(f"Señal LFP del Canal {lfp_channel}.")
-    plt.subplot(212)
-    plt.plot(clean_interpolated_data[0][0:round(5*60*rate_used), -1], "xb")
-    plt.title(f"Información de ángulos [°]. {interpolation_}.")
-    plt.suptitle(f"5 minutos limpios de la sesión: {session} a {rate_used}Hz.")
-    ui.store_figure(figname)
+    fig, axs = plt.subplots(2, 1, num=figname, constrained_layout=True)
+    fig.suptitle(f"5 minutos limpios de la sesión: {session} a {rate_used}Hz.")
+    axs[0].plot(clean_interpolated_data[0][0:round(5*60*rate_used), lfp_channel], "xr")
+    axs[0].set_title(f"Señal LFP del Canal {lfp_channel}.")
+    axs[1].plot(clean_interpolated_data[0][0:round(5*60*rate_used), -1], "xb")
+    axs[1].set_title(f"Ángulos [°]. {interpolation_}.")
+    ui.store_figure(figname, show=Env.debug)
+
 
     # ------- STEP 8 -------
     Env.step("Get Preferred angle.")
@@ -227,6 +226,7 @@ def data_set_generator():
     Env.step()
 
     n = len(largest_subset)
+    Env.print_text(f"Largest subset: {max_subset_index} = {n} samples")
     train_array = largest_subset[0:int(n * 0.7), :]
     valid_array = largest_subset[int(n * 0.7):int(n * 0.9), :]
     test_array = largest_subset[int(n * 0.9):, :]
@@ -254,8 +254,8 @@ def data_set_generator():
         Env.print_text(f'Labels shape (batch, time, labels): {example_labels.shape}')
 
     # ------- FINISH TEST AND EXIT -------
-    Env.finish_test()
-    #Env.finish_test(str(session) + "_" + interpolation.title() + "_" + sync_method.replace(" ", ""))
+    #Env.finish_test()
+    Env.finish_test(str(session) + "_" + interpolation.replace(" ", "") + "_" + sync_method.replace(" ", ""))
 
 
 # ------- Execute Dataset generation -------

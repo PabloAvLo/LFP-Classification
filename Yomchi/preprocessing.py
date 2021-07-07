@@ -316,9 +316,12 @@ def clean_invalid_positional(labeled_dataset, is_padded=True):
     if discontinuities_ends[-1] != len(labeled_dataset)-1:
         clean_datasets.append(labeled_dataset[discontinuities_ends[-1] + 1:-1, :])
 
-    # Delete subsets with only 1 valid sample (i.e its length is <=32)
-    # From the resulting subsets, delete the last 31 rows with NaN angles
-    clean_datasets = [v[:-31, :] for v in clean_datasets if len(v) > 32]
+    if is_padded:
+        # Delete subsets with only 1 valid sample (i.e its length is <=32)
+        # From the resulting subsets, delete the last 31 rows with NaN angles
+        clean_datasets = [v[:-31, :] for v in clean_datasets if len(v) > 32]
+    else:
+        clean_datasets = [v[:, :] for v in clean_datasets if len(v) > 2]
 
     Env.print_text(f"Total number of valid subsets: {len(clean_datasets)}")
     for s in range(0, len(clean_datasets)):

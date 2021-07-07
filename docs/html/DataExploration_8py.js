@@ -1,4 +1,4 @@
 var DataExploration_8py =
 [
-    [ "dataExploration", "DataExploration_8py.html#a35b406d7a4af7215564bd219422e7847", null ]
+    [ "data_exploration", "DataExploration_8py.html#a6e33db6396e97a21d3cdee8263b9be69", null ]
 ];

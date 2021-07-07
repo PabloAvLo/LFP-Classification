@@ -6,7 +6,7 @@ var preprocessing_8py =
     [ "channels_to_windows", "preprocessing_8py.html#a51d417cfd2e1c266f46c127382ca1ca3", null ],
     [ "clean_invalid_positional", "preprocessing_8py.html#a94f4344cb9e3ae38fd30461c89a56c7d", null ],
     [ "downsample_lfps", "preprocessing_8py.html#a0fb1b0a0559dc6b2194c7523dbba5651", null ],
-    [ "interpolate_angles", "preprocessing_8py.html#a90f23123cf49c54b05e0a7a4107be79f", null ],
+    [ "interpolate_angles", "preprocessing_8py.html#a2ab7198f7f92dbfd4a54ad3ebfb4684e", null ],
     [ "load_angles_data", "preprocessing_8py.html#a9b8b66054872cbb61be7a027560025c0", null ],
     [ "load_lfp_data", "preprocessing_8py.html#afffd2cc81ede3e8b8e922ea04f348b0f", null ],
     [ "ndarray_to_dataframe", "preprocessing_8py.html#a1977f1b01c199a1e9ab6c1fd507357f2", null ],
