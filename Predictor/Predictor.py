@@ -60,7 +60,7 @@ def predictor():
 
     # Session, data and methods Parameters
     session = 771  # 765 or 771
-    interpolation = "Shortest"  # or "linear", "quadratic", "cubic", "nearest", "Shortest"
+    interpolation = "Shortest Angle"  # or "linear", "quadratic", "cubic", "nearest", "Shortest Angle"
     rate_used = data.POSITION_DATA_SAMPLING_RATE  # or data.POSITION_DATA_SAMPLING_RATE
 
     # Windowing properties

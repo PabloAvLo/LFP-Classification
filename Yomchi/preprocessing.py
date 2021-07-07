@@ -193,7 +193,7 @@ def vectorized_sai(angles_data):
     return interpolated_angles
 
 
-def interpolate_angles(angles_data, method="Shortest"):
+def interpolate_angles(angles_data, method="Shortest Angle"):
     """
     Replace 'NaN' values in angular data with an interpolated value using a given method.
     @param angles_data: Array with the angles data extracted from the animal positions.
@@ -201,16 +201,20 @@ def interpolate_angles(angles_data, method="Shortest"):
     by pandas.DataFrame.interpolate function, which are: 'linear', 'quadratic', 'cubic', 'polynomial', among others.
     @return interpolated_angles: Array with the angles data interpolated using the given method.
     """
-    Env.print_text("Interpolate angles data using " + method + " method.")
 
-    if method == "Shortest":
-        interpolated_angles = vectorized_sai(angles_data)
+    if np.count_nonzero(np.isnan(angles_data)) > 0:
+        Env.print_text("Interpolate angles data using " + method + " method.")
 
+        if method == "Shortest Angle":
+            interpolated_angles = vectorized_sai(angles_data)
+
+        else:
+            angles_series = pd.Series(angles_data)
+            interpolated_angles = angles_series.interpolate(method)
+            interpolated_angles = interpolated_angles.to_numpy()
     else:
-        angles_series = pd.Series(angles_data)
-        interpolated_angles = angles_series.interpolate(method)
-        interpolated_angles = interpolated_angles.to_numpy()
-
+        Env.print_text("Skipping Interpolation of angles since the angles weren't padded.")
+        interpolated_angles = angles_data
     return interpolated_angles
 
 

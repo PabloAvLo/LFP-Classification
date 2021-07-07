@@ -72,7 +72,7 @@ def data_set_generator():
     # Dataset Generation Parameters
     # The recording session 771 has a 23.81% of invalid positions, while the session 765 has only 6.98%
     session = 771  # 771 or 765
-    interpolation = "Shortest"  # "linear" "quadratic" "cubic" "nearest" "Shortest"
+    interpolation = "Shortest Angle"  # "linear" "quadratic" "cubic" "nearest" "Shortest Angle"
     sync_method = "Downsample LFPs"  # "Upsample Angles" "Downsample LFPs"
 
     # Data Properties
@@ -120,6 +120,7 @@ def data_set_generator():
     angles_data = data.load_angles_data(data.ANGLES[session])
 
     # ------- STEP 3 -------
+    interpolation_ = ""
     if sync_method == "Downsample LFPs":
         Env.step("Downsample LFP data to match Angles sampling rate.")
         lfp_data = data.downsample_lfps(lfp_data, data.LFP_DATAMAX_SAMPLING_RATE, data.POSITION_DATA_SAMPLING_RATE)
@@ -128,6 +129,7 @@ def data_set_generator():
         Env.step("Upsample Angles data to reach a higher sampling rate")
         angles_data = data.angles_expansion(angles_data, data.POSITION_DATA_SAMPLING_RATE,
                                             data.LFP_DATAMAX_SAMPLING_RATE)
+        interpolation_ = f".\n Interpolada con: {interpolation}"
 
     # ------- STEP 4 -------
     Env.step("Label data by concatenating LFPs and interpolated Angles in a single 2D-array.")
@@ -171,6 +173,19 @@ def data_set_generator():
     plt.plot(clean_interpolated_data[4][:, lfp_channel], "x-r")
     plt.title(f"LFPs del Canal {lfp_channel}. Sesión: {session} a {rate_used}Hz")
     ui.store_figure(figname, show=Env.debug)
+
+    Env.step(f"Plot clean LFP data from the chosen channel and interpolated angles data at {rate_used}Hz. [°]")
+
+    figname = f"{session}_LFP_C{lfp_channel}_clean_and_angles_{interpolation}_{rate_used}Hz"
+    plt.figure(figname)
+    plt.subplot(211)
+    plt.plot(clean_interpolated_data[0][0:round(5*60*rate_used), lfp_channel], "xr")
+    plt.title(f"Señal LFP del Canal {lfp_channel}.")
+    plt.subplot(212)
+    plt.plot(clean_interpolated_data[0][0:round(5*60*rate_used), -1], "xb")
+    plt.title(f"Información de ángulos [°]. {interpolation_}.")
+    plt.suptitle(f"5 minutos limpios de la sesión: {session} a {rate_used}Hz.")
+    ui.store_figure(figname)
 
     # ------- STEP 8 -------
     Env.step("Get Preferred angle.")
