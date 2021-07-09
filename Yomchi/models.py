@@ -24,49 +24,31 @@ def mlp(layers, units_per_layer, dropout=None):
     @param layers: Number of hidden layers (besides the input and outputs ones).
     @param units_per_layer: Number of neurons per layer. Applies to all layers except for the last one which has only 1:
     the predicted angle.
-    @param dropout: A value between 0 and 1 of neuron's results to discard of the training. If provided, two layers of
-    this regularization method will be added to the model. One after the input layer and one before the output layer.
+    @param dropout: A value between 0 and 1 of neuron's results to discard of the training. This regularization method
+    will be added to the model. One after the input layer and one before the output layer.
     @return model: The model of the MLP created for later usage as the predictor.
     """
 
     Env.print_text(f"Creating a fully-connected feed-forward Neural Network model with {layers} layers, using "
                    f"{units_per_layer} units per layer. \nThe activation function in the hidden layers is 'ReLu' and "
                    f"the output layer has only 1 unit (the predicted angle).")
+
     model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Flatten())  # Shape: (time, features) => (time*features)
+    model.add(tf.keras.layers.Dense(units=units_per_layer, activation=tf.nn.relu))  # Input layer
+    model.add(tf.keras.layers.Dropout(dropout))
 
-    # Shape: (time, features) => (time*features)
-    model.add(tf.keras.layers.Flatten())
+    for n in range(1, layers):  # Other hidden layers
+        model.add(tf.keras.layers.Dense(units=units_per_layer, activation=tf.nn.relu))
 
-    # First layer (need to specify the input size)
-    model.add(tf.keras.layers.Dense(
-        units=units_per_layer,
-        activation=tf.nn.relu))
-
-    if dropout is not None:
-        model.add(tf.keras.layers.Dropout(dropout))
-
-    # Other hidden layers
-    for n in range(1, layers):
-        model.add(tf.keras.layers.Dense(
-            units=units_per_layer,
-            activation=tf.nn.relu))
-
-    if dropout is not None:
-        model.add(tf.keras.layers.Dropout(dropout))
-
-    # Output layer
-    model.add(tf.keras.layers.Dense(
-        units=1
-    ))
-
-    # Add back the time dimension.
-    # Shape: (outputs) => (1, outputs)
-    model.add(tf.keras.layers.Reshape([1, -1]))
+    model.add(tf.keras.layers.Dropout(dropout))
+    model.add(tf.keras.layers.Dense(units=1))  # Output layer
+    model.add(tf.keras.layers.Reshape([1, -1]))  # Add back the time dimension. Shape: (outputs) => (1, outputs)
 
     return model
 
 
-def cnn(inputs, units_per_layer):
+def cnn(inputs, units_per_layer, dropout):
     """
     Creates a model of a Convolutional Neural Network with a Conv1D as the input layer, one dense as the only hidden
     layer and another dense with only 1 neuron as the output layer. The first two layer has ReLU activation and the last
@@ -75,28 +57,30 @@ def cnn(inputs, units_per_layer):
     convolutional layer outputs a single value throughout the specified number of filters.
     @param units_per_layer: Specified the number of neurons of the hidden dense layer, which has to match with the
     number of filters that will output a result in the 1D convolutional input layer.
+    @param dropout: A value between 0 and 1 of neuron's results to discard of the training. This regularization method
+    will be added to the model as a layer the output layer.
     @return conv_model: The model of the CNN created for later usage as the predictor.
     """
     Env.print_text(f"Creating a Convolutional Neural Network model with one 1D convolutional layer, using "
                    f"{units_per_layer} filters and units in the following dense layer. \nThe activation function in "
                    f"the dense layer is 'ReLU' and the output dense layer has only 1 unit (the predicted angle).")
 
-    conv_model = tf.keras.Sequential([
-        tf.keras.layers.Conv1D(filters=units_per_layer,
-                               kernel_size=(inputs,),
-                               activation='relu'),
-        tf.keras.layers.Dense(units=units_per_layer, activation='relu'),
-        tf.keras.layers.Dense(units=1),
-    ])
+    conv_model = tf.keras.Sequential()
+    conv_model.add(tf.keras.layers.Conv1D(filters=units_per_layer, kernel_size=(inputs,), activation='relu'))
+    conv_model.add(tf.keras.layers.Dense(units=units_per_layer, activation='relu'))
+    conv_model.add(tf.keras.layers.Dropout(dropout))
+    conv_model.add(tf.keras.layers.Dense(units=1))
 
     return conv_model
 
 
-def lstm(units_per_layer):
+def lstm(units_per_layer, dropout):
     """
     Creates a model of a Long Short-Term Memory Neural Network as the input layer, one dense with only 1 neuron as the
     output layer. The activation functions of the LSTM layer are the regular ones for each of it's gates.
     @param units_per_layer: Number of inputs of the network.
+    @param dropout: A value between 0 and 1 of neuron's results to discard of the training. If provided,this
+    regularization method will be to the LSTM Layer.
     @return lstm_model: The model of the LSTM created for later usage as the predictor.
     """
 
@@ -104,12 +88,10 @@ def lstm(units_per_layer):
                    f"\nThis network only outputs the final timestamp, giving the model time to warm up its internal  "
                    f"state before making a single prediction.")
 
-    lstm_model = tf.keras.models.Sequential([
-        # Shape [batch, time, features] => [batch, time, lstm_units]
-        tf.keras.layers.LSTM(units_per_layer, return_sequences=False),
-        # Shape => [batch, time, features]
-        tf.keras.layers.Dense(units=1)
-    ])
+    # Shape [batch, time, features] => [batch, time, lstm_units]
+    lstm_model = tf.keras.models.Sequential()
+    lstm_model.add(tf.keras.layers.LSTM(units_per_layer, return_sequences=False, dropout=dropout))
+    lstm_model.add(tf.keras.layers.Dense(units=1))  # Shape => [batch, time, features]
 
     return lstm_model
 

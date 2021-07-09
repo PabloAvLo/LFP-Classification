@@ -384,5 +384,5 @@ def data_exploration():
     Env.finish_test(f"{session}_{interpolation}_" + sync_method.replace(" ", ""))
 
 
-# ------- Execute Dataset generation -------
+# ------- Execute Dataset Exploration -------
 data_exploration()

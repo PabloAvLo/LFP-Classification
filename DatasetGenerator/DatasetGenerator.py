@@ -57,7 +57,6 @@ def data_set_generator():
         <li> <b>Step 9:</b> Get largest subset of data.
         <li> <b>Step 10:</b> Split the subset into training, validation and testing set.
         <li> <b>Step 11:</b> Save the dataset to a pickle file.
-        <li> <b>Step 12:</b> Convert data to windowed series.
         <li> <b>Finish Test and Exit: </b> Save logs, captures, results and the generated dataset into a .pickle file.
     </ul>
     """
@@ -72,8 +71,8 @@ def data_set_generator():
     # Dataset Generation Parameters
     # The recording session 771 has a 23.81% of invalid positions, while the session 765 has only 6.98%
     session = 771  # 771 or 765
-    interpolation = "Shortest Angle"  # "linear" "quadratic" "cubic" "nearest" "Shortest Angle"
-    sync_method = "Downsample LFPs"  # "Upsample Angles" "Downsample LFPs"
+    interpolation = "linear"  # "linear" "quadratic" "cubic" "nearest" "Shortest Angle"
+    sync_method = "Upsample Angles"  # "Upsample Angles" "Downsample LFPs"
 
     # Data Properties
     num_channels = data.EC014_41_NUMBER_OF_CHANNELS
@@ -82,9 +81,6 @@ def data_set_generator():
         rate_used = data.LFP_DATAMAX_SAMPLING_RATE
 
     # Windowing properties
-    window_size = 4  # Recommended between 100ms to 200ms.
-    batch_size = 32
-    shuffle_buffer = 1000
     lfp_channel = 70
     round_angles = False
     base_angle = 0  # Unused if round_angles = False
@@ -95,18 +91,14 @@ def data_set_generator():
         extra.update({"Angle labels starting from": str(base_angle) + "°",
                       "until 360° in steps of": str(offset_between_angles) + "°"})
 
-    o_pickle_file_name = f"S-{session}_C{lfp_channel}_I-{interpolation}_F-{rate_used}_W-" \
-                         f"{int(window_size * 1e3 / rate_used)}ms.pickle"
+    o_pickle_file_name = f"S-{session}_I-" + interpolation.replace(" ", "") + f"_F-{int(rate_used)}.pickle"
 
     parameters_dictionary = {"Recording Session Number": str(session),
                              "Interpolation Method": interpolation.title(),
                              "Synchronization Method": sync_method,
                              "Number of Recorded Channels": str(num_channels),
                              "Sampling Rate to Use": str(rate_used) + " Hz",
-                             "Window Size": window_size,
-                             "Batch size (# of windows)": batch_size,
-                             "LFP Signal channel to use": lfp_channel,
-                             "Shuffle buffer size": shuffle_buffer}
+                             "LFP Signal channel to use": lfp_channel}
 
     parameters_dictionary.update(extra)
     Env.print_parameters(parameters_dictionary)
@@ -240,18 +232,6 @@ def data_set_generator():
 
     with open(f"{Env.RESULTS_FOLDER}/{o_pickle_file_name}", 'wb') as f:
         pickle.dump([train_array, valid_array, test_array], f)
-
-    # ------- STEP 12 -------
-    Env.step("Convert data to windowed series.")
-
-    train_data = data.channels_to_windows(train_array, lfp_channel, window_size, batch_size, shuffle_buffer)
-    val_data = data.channels_to_windows(valid_array, lfp_channel, window_size, batch_size, shuffle_buffer)
-    test_data = data.channels_to_windows(test_array, lfp_channel, window_size, batch_size, shuffle_buffer)
-
-    # The shape should be (batch, time, features) to be compatible with what tensorflow expects as default.
-    for example_inputs, example_labels in train_data.take(1):
-        Env.print_text(f'Inputs shape (batch, time, samples): {example_inputs.shape}')
-        Env.print_text(f'Labels shape (batch, time, labels): {example_labels.shape}')
 
     # ------- FINISH TEST AND EXIT -------
     #Env.finish_test()
