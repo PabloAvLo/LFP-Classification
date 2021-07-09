@@ -66,7 +66,7 @@ def predictor():
     rate_used = data.POSITION_DATA_SAMPLING_RATE  # data.LFP_DATAMAX_SAMPLING_RATE or data.POSITION_DATA_SAMPLING_RATE
 
     # Windowing properties
-    window_size = int(rate_used * 0.1 * 11)  # Frequency_used * 0.1 = 100ms.
+    window_size = int(rate_used * 0.1 * 2)  # Frequency_used * 0.1 = 100ms.
     batch_size = 32
     shuffle_buffer = 1000
     lfp_channel = 40
@@ -76,8 +76,8 @@ def predictor():
     units_per_layer = 32
     dropout = 0.2
     layers = 3
-    epochs = 20
-    model_name = "LSTM"  # "LSTM" "MLP" or "CNN"
+    epochs = 50
+    model_name = "CNN"  # "LSTM" "MLP" or "CNN"
 
     # Input pickle file.
     i_pickle_file_name = f"S-{session}_I-" + interpolation.replace(" ", "") + f"_F-{int(rate_used)}.pickle"

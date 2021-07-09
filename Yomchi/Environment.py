@@ -8,7 +8,7 @@
 @file Environment.py
 @author Pablo Avila [B30724] jose.avilalopez@ucr.ac.cr
 @copyright MIT License
-@date May, 2020
+@date July, 2021
 @details Python environment which integrates data pre-processing, ML models implementation, data visualization and
 metrics. This module contains a set of functions to successfully document every test run by creating Results folders
 with console logs, generated images, dependencies versions, etc.
