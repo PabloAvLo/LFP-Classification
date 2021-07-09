@@ -9,5 +9,5 @@ var searchData=
   ['load_5flfp_5fdata',['load_lfp_data',['../namespacepreprocessing.html#afffd2cc81ede3e8b8e922ea04f348b0f',1,'preprocessing']]],
   ['log_5fversions',['log_versions',['../namespaceEnvironment.html#ac25464c1ac95259d6fba126ac09a7a63',1,'Environment']]],
   ['logs_5ffolder',['LOGS_FOLDER',['../namespaceEnvironment.html#a97a68beb1914a8e46858505ad6b9144e',1,'Environment']]],
-  ['lstm',['lstm',['../namespacemodels.html#acf089e6a19274bccc280bbde63d15152',1,'models']]]
+  ['lstm',['lstm',['../namespacemodels.html#a159bf96eb539e8f2c7e01cedb7f1431e',1,'models']]]
 ];

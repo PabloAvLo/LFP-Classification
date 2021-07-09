@@ -94,19 +94,19 @@ Functions</h2></td></tr>
 <tr class="memitem:a854ea8d04fc31da17262dd76129950c9"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemodels.html#a854ea8d04fc31da17262dd76129950c9">mlp</a> (layers, units_per_layer, dropout=None)</td></tr>
 <tr class="memdesc:a854ea8d04fc31da17262dd76129950c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines a classical neural network sometimes called: Multi-Layer Perceptron.  <a href="#a854ea8d04fc31da17262dd76129950c9">More...</a><br /></td></tr>
 <tr class="separator:a854ea8d04fc31da17262dd76129950c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae77d927ea2f202323498bde9dd19d005"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemodels.html#ae77d927ea2f202323498bde9dd19d005">cnn</a> (inputs, units_per_layer)</td></tr>
-<tr class="memdesc:ae77d927ea2f202323498bde9dd19d005"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a model of a Convolutional Neural Network with a Conv1D as the input layer, one dense as the only hidden layer and another dense with only 1 neuron as the output layer.  <a href="#ae77d927ea2f202323498bde9dd19d005">More...</a><br /></td></tr>
-<tr class="separator:ae77d927ea2f202323498bde9dd19d005"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf089e6a19274bccc280bbde63d15152"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemodels.html#acf089e6a19274bccc280bbde63d15152">lstm</a> (units_per_layer)</td></tr>
-<tr class="memdesc:acf089e6a19274bccc280bbde63d15152"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a model of a Long Short-Term Memory Neural Network as the input layer, one dense with only 1 neuron as the output layer.  <a href="#acf089e6a19274bccc280bbde63d15152">More...</a><br /></td></tr>
-<tr class="separator:acf089e6a19274bccc280bbde63d15152"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af320264f4469bce192c3b7ec7507a62d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemodels.html#af320264f4469bce192c3b7ec7507a62d">cnn</a> (inputs, units_per_layer, dropout)</td></tr>
+<tr class="memdesc:af320264f4469bce192c3b7ec7507a62d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a model of a Convolutional Neural Network with a Conv1D as the input layer, one dense as the only hidden layer and another dense with only 1 neuron as the output layer.  <a href="#af320264f4469bce192c3b7ec7507a62d">More...</a><br /></td></tr>
+<tr class="separator:af320264f4469bce192c3b7ec7507a62d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a159bf96eb539e8f2c7e01cedb7f1431e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemodels.html#a159bf96eb539e8f2c7e01cedb7f1431e">lstm</a> (units_per_layer, dropout)</td></tr>
+<tr class="memdesc:a159bf96eb539e8f2c7e01cedb7f1431e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a model of a Long Short-Term Memory Neural Network as the input layer, one dense with only 1 neuron as the output layer.  <a href="#a159bf96eb539e8f2c7e01cedb7f1431e">More...</a><br /></td></tr>
+<tr class="separator:a159bf96eb539e8f2c7e01cedb7f1431e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab269ff4ccafc035859a850db6d9c5ebf"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemodels.html#ab269ff4ccafc035859a850db6d9c5ebf">compile_and_fit</a> (model, train, val, epochs=20, patience=2)</td></tr>
 <tr class="memdesc:ab269ff4ccafc035859a850db6d9c5ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fits the provided training data in the specified model and train's it.  <a href="#ab269ff4ccafc035859a850db6d9c5ebf">More...</a><br /></td></tr>
 <tr class="separator:ab269ff4ccafc035859a850db6d9c5ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ae77d927ea2f202323498bde9dd19d005"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae77d927ea2f202323498bde9dd19d005">&#9670;&nbsp;</a></span>cnn()</h2>
+<a id="af320264f4469bce192c3b7ec7507a62d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af320264f4469bce192c3b7ec7507a62d">&#9670;&nbsp;</a></span>cnn()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -121,7 +121,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>units_per_layer</em>&#160;</td>
+          <td class="paramname"><em>units_per_layer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>dropout</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -136,12 +142,13 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">inputs</td><td>Number of inputs of the network. It is used as the kernel size with the intention that the 1D convolutional layer outputs a single value throughout the specified number of filters. </td></tr>
     <tr><td class="paramname">units_per_layer</td><td>Specified the number of neurons of the hidden dense layer, which has to match with the number of filters that will output a result in the 1D convolutional input layer. </td></tr>
+    <tr><td class="paramname">dropout</td><td>A value between 0 and 1 of neuron's results to discard of the training. This regularization method will be added to the model as a layer the output layer. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>conv_model: The model of the CNN created for later usage as the predictor. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="models_8py_source.html#l00082">82</a> of file <a class="el" href="models_8py_source.html">models.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="models_8py_source.html#l00066">66</a> of file <a class="el" href="models_8py_source.html">models.py</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="Predictor_8py_source.html#l00053">Predictor.predictor()</a>.</p>
 
@@ -204,14 +211,14 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>history: The results of the training. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="models_8py_source.html#l00134">134</a> of file <a class="el" href="models_8py_source.html">models.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="models_8py_source.html#l00116">116</a> of file <a class="el" href="models_8py_source.html">models.py</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="Predictor_8py_source.html#l00053">Predictor.predictor()</a>.</p>
 
 </div>
 </div>
-<a id="acf089e6a19274bccc280bbde63d15152"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acf089e6a19274bccc280bbde63d15152">&#9670;&nbsp;</a></span>lstm()</h2>
+<a id="a159bf96eb539e8f2c7e01cedb7f1431e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a159bf96eb539e8f2c7e01cedb7f1431e">&#9670;&nbsp;</a></span>lstm()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -220,8 +227,18 @@ Functions</h2></td></tr>
           <td class="memname">def models.lstm </td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>units_per_layer</em></td><td>)</td>
+          <td class="paramname"><em>units_per_layer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>dropout</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -230,12 +247,13 @@ Functions</h2></td></tr>
 <p>The activation functions of the LSTM layer are the regular ones for each of it's gates. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">units_per_layer</td><td>Number of inputs of the network. </td></tr>
+    <tr><td class="paramname">dropout</td><td>A value between 0 and 1 of neuron's results to discard of the training. If provided,this regularization method will be to the LSTM Layer. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>lstm_model: The model of the LSTM created for later usage as the predictor. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="models_8py_source.html#l00105">105</a> of file <a class="el" href="models_8py_source.html">models.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="models_8py_source.html#l00089">89</a> of file <a class="el" href="models_8py_source.html">models.py</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="Predictor_8py_source.html#l00053">Predictor.predictor()</a>.</p>
 
@@ -278,7 +296,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">layers</td><td>Number of hidden layers (besides the input and outputs ones). </td></tr>
     <tr><td class="paramname">units_per_layer</td><td>Number of neurons per layer. Applies to all layers except for the last one which has only 1: the predicted angle. </td></tr>
-    <tr><td class="paramname">dropout</td><td>A value between 0 and 1 of neuron's results to discard of the training. If provided, two layers of this regularization method will be added to the model. One after the input layer and one before the output layer. </td></tr>
+    <tr><td class="paramname">dropout</td><td>A value between 0 and 1 of neuron's results to discard of the training. This regularization method will be added to the model. One after the input layer and one before the output layer. </td></tr>
   </table>
   </dd>
 </dl>
