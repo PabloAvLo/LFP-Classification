@@ -46,6 +46,8 @@ def predictor():
         <li> <b>Step 3:</b> Create the model with the specified parameters
         <li> <b>Step 4:</b> Train the model with the training and validation data.
         <li> <b>Step 5:</b> Plotting the original angular data vs the predictions for different batch sizes.
+        <li> <b>Step 6:</b> Plotting the original angular data vs the predictions of all testing data.
+        <li> <b>Step 7:</b> Plotting the historic of the training vs the validation error values.
         <li> <b>Finish Test and Exit:</b> Save logs, captures and results.
     </ul>
     """
@@ -64,7 +66,7 @@ def predictor():
     rate_used = data.POSITION_DATA_SAMPLING_RATE  # data.LFP_DATAMAX_SAMPLING_RATE or data.POSITION_DATA_SAMPLING_RATE
 
     # Windowing properties
-    window_size = int(rate_used * 0.1 * 2)  # Frequency_used * 0.1 = 100ms.
+    window_size = int(rate_used * 0.1 * 11)  # Frequency_used * 0.1 = 100ms.
     batch_size = 32
     shuffle_buffer = 1000
     lfp_channel = 40
@@ -74,8 +76,8 @@ def predictor():
     units_per_layer = 32
     dropout = 0.2
     layers = 3
-    epochs = 10
-    model_name = "MLP"  # "LSTM" "MLP" or "CNN"
+    epochs = 20
+    model_name = "LSTM"  # "LSTM" "MLP" or "CNN"
 
     # Input pickle file.
     i_pickle_file_name = f"S-{session}_I-" + interpolation.replace(" ", "") + f"_F-{int(rate_used)}.pickle"
@@ -87,7 +89,7 @@ def predictor():
                              "Pickle file used": i_pickle_file_name,
                              "Batches to Plot": str(batches_to_plot),
                              "Batch size (# of windows)": batch_size,
-                             "Window Size": f"{window_size} samples ({int(window_size*1e3/rate_used)}ms)",
+                             "Window Size": f"{window_size} samples ({int(window_size * 1e3 / rate_used)}ms)",
                              "Model Name": model_name,
                              "Layers (for MLP model only)": str(layers),
                              "Epochs": str(epochs),
@@ -165,7 +167,8 @@ def predictor():
             pred = np.append(pred, model.predict(inputs))
 
         # Plotting
-        figname = f"predictions_{model_name}_S{session}_B{batches}"
+        figname = f"{model_name}_S-{session}_W-{int(window_size * 1e3 / rate_used)}_F-{int(rate_used)}_E-{epochs}_C-" \
+                  f"{lfp_channel}_B{batches}"
 
         fig, axs = plt.subplots(2, 1, num=figname)
         axs[0].set_title(
@@ -183,9 +186,53 @@ def predictor():
         axs[1].legend()
         ui.store_figure(figname, show=Env.debug)
 
+    for inputs, label in test_data:
+        # Getting original data
+        real = np.append(real, label[:, 0, 0].numpy())
+        lfps = np.append(lfps, inputs[:, 0, 0].numpy())
+        # Getting predicted data
+        pred = np.append(pred, model.predict(inputs))
+
+    # ------- STEP 6 -------
+    Env.step(f"Plotting the original angular data vs the predictions of all testing data")
+
+    figname = f"{model_name}_S-{session}_W-{int(window_size * 1e3 / rate_used)}_F-{int(rate_used)}_E-{epochs}_C-" \
+              f"{lfp_channel}_BAll"
+
+    fig, axs = plt.subplots(2, 1, num=figname)
+    axs[0].set_title(
+        f"{model_name} fs:{rate_used} Epochs:{epochs} Batches: Todos. Ventana:"
+        f"{int(window_size * 1e3 / rate_used)}ms."
+        f" {interpolated}")
+
+    axs[0].set_xlabel(f"Predicción de Ángulos contra ángulos originales.")
+    axs[0].scatter(range(len(real)), real, label='Originales', c='#2ca02c', s=10)
+    axs[0].scatter(range(len(pred)), pred, marker='X', label='Predicciones', c='#ff7f0e', s=16)
+    axs[0].legend()
+
+    axs[1].set_xlabel(f'Canal de LFP: {lfp_channel}')
+    axs[1].scatter(range(len(lfps)), lfps, label='LFPs', c='#0a7fdb', s=10)
+    axs[1].legend()
+    ui.store_figure(figname, show=Env.debug)
+
+    # ------- STEP 7 -------
+    Env.step(f"Plotting the historic of the training vs the validation error values.")
+
+    figname = f"{model_name}_S-{session}_W-{int(window_size * 1e3 / rate_used)}_F-{int(rate_used)}_E-{epochs}_C-" \
+              f"{lfp_channel}_history"
+    plt.figure(figname)
+    plt.plot(history.history['mean_absolute_error'], "x-r", label="Entrenamiento")
+    plt.plot(history.history['val_mean_absolute_error'], "x-b", label="Validación")
+    plt.xlabel("Época")
+    plt.ylabel("MAE")
+    plt.legend(loc='best')
+    plt.title(f"Error Medio contra épocas. {model_name} fs:{rate_used} Epochs:{epochs} Ventana:"
+              f"{int(window_size * 1e3 / rate_used)}ms. {interpolated}")
+    ui.store_figure(figname)
+
     # ------- FINISH TEST AND EXIT -------
-    #Env.finish_test()
-    Env.finish_test(f"M-{model_name}_S-{session}_W-{int(window_size*1e3/rate_used)}_F-{int(rate_used)}"
+    # Env.finish_test()
+    Env.finish_test(f"M-{model_name}_S-{session}_W-{int(window_size * 1e3 / rate_used)}_F-{int(rate_used)}"
                     f"_E-{epochs}_C-{lfp_channel}")
 
 
